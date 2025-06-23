@@ -1,12 +1,7 @@
-export default function E() {
-  return null;
-}
 
-export async function getServerSideProps() {
-  return {
-    redirect: {
-      destination: 'https://beltegoed.nl/bol-com-cadeaukaart',
-      permanent: false,
-    },
-  };
+export default function Expired() {
+  if (typeof window !== "undefined") {
+    window.location.href = "https://beltegoed.nl/bol-com-cadeaukaart";
+  }
+  return null;
 }
