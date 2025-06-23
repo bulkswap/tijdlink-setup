@@ -1,8 +1,11 @@
+
+// pages/eenmalig.js
+import { useEffect } from "react";
+
 export default function Eenmalig() {
-  return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Eenmalige link</h1>
-      <p>Deze link is eenmalig te gebruiken binnen 60 minuten.</p>
-    </div>
-  );
+  useEffect(() => {
+    window.location.href = "https://tikkie.me/pay/v5e4jnd2iqbhe7o53k0n";
+  }, []);
+
+  return <p>Je wordt doorgestuurd naar Tikkie...</p>;
 }

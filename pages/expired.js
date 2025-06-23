@@ -1,8 +1,11 @@
+
+// pages/expired.js
+import { useEffect } from "react";
+
 export default function Expired() {
-  return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Link verlopen</h1>
-      <p>Deze link is niet meer geldig.</p>
-    </div>
-  );
+  useEffect(() => {
+    window.location.href = "https://beltegoed.nl/bol-com-cadeaukaart";
+  }, []);
+
+  return <p>Je wordt doorgestuurd...</p>;
 }
