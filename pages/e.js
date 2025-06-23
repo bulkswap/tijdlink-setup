@@ -1,10 +1,7 @@
 
-import { useEffect } from "react";
-
-export default function E() {
-  useEffect(() => {
+export default function Expired() {
+  if (typeof window !== "undefined") {
     window.location.href = "https://beltegoed.nl/bol-com-cadeaukaart";
-  }, []);
-
-  return <p>Deze link is verlopen. Je wordt doorgestuurd...</p>;
+  }
+  return null;
 }
