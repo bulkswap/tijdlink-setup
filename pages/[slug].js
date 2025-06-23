@@ -25,11 +25,16 @@ export async function getServerSideProps(context) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
+  // ⛔️ Bots krijgen altijd target, maar zetten nooit firstClick
+  if (isBot) {
+    return { redirect: { destination: parsed.target, permanent: false } };
+  }
+
   const now = Date.now();
   const validFor = 7 * 60 * 1000; // 7 minuten
 
-  // Als geen firstClick én geen bot → zet firstClick
-  if (!parsed.firstClick && !isBot) {
+  // Als geen firstClick → zet firstClick en redirect
+  if (!parsed.firstClick) {
     await fetch(`${redisUrl}/set/slug-${slug}`, {
       method: 'POST',
       headers: {
@@ -42,13 +47,13 @@ export async function getServerSideProps(context) {
     return { redirect: { destination: parsed.target, permanent: false } };
   }
 
-  // Als wel firstClick → check of nog geldig
-  const diff = now - (parsed.firstClick || 0);
+  // Als firstClick bestaat → check of link nog geldig is
+  const diff = now - parsed.firstClick;
   if (diff < validFor) {
     return { redirect: { destination: parsed.target, permanent: false } };
   }
 
-  // Te laat
+  // ❌ Te laat
   return { redirect: { destination: '/e', permanent: false } };
 }
 
