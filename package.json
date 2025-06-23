@@ -9,6 +9,8 @@
   "dependencies": {
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "nanoid": "^4.0.0",
+    "@upstash/redis": "^1.22.0"
   }
 }
