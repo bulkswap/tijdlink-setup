@@ -1,17 +1,14 @@
+// /pages/api/redirect.js
 import fs from 'fs';
 import path from 'path';
 
 export default function handler(req, res) {
-  if (!req.query || !req.query.slug) {
-    return res.status(400).json({ error: 'Slug is missing' });
-  }
-
   const { slug } = req.query;
   const dbPath = path.join(process.cwd(), 'redirects.json');
   const data = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 
   const entry = data[slug];
-  if (!entry) return res.redirect('/f');
+  if (!entry) return res.redirect('/e');
 
   const now = Date.now();
 
@@ -25,6 +22,6 @@ export default function handler(req, res) {
   if (diff < 7 * 60 * 1000) {
     return res.redirect(entry.target);
   } else {
-    return res.redirect('/f');
+    return res.redirect('/e');
   }
 }
