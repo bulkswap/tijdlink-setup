@@ -1,37 +1,58 @@
 // pages/[slug].js
-export async function getServerSideProps(context) {
-  const { slug } = context.params;
+import { Redis } from '@upstash/redis';
 
-  const response = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/slug-${slug}`, {
-    headers: {
-      Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
-    },
-  });
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
-  const data = await response.json();
-  let target = null;
+export async function getServerSideProps({ params }) {
+  const slug = params.slug;
+  const key = `slug-${slug}`;
+  const entry = await redis.get(key);
 
-  try {
-    const parsed = JSON.parse(data.result); // Redis slaat object als string op
-    target = parsed?.target;
-  } catch (e) {
-    console.error("Parsing error:", e);
-  }
-
-  if (!target) {
+  if (!entry) {
     return {
-      notFound: true,
+      redirect: {
+        destination: '/e',
+        permanent: false,
+      },
     };
   }
 
-  return {
-    redirect: {
-      destination: target,
-      permanent: false,
-    },
-  };
+  const now = Date.now();
+
+  if (!entry.firstClick) {
+    // eerste bezoek: sla timestamp op
+    await redis.set(key, { ...entry, firstClick: now });
+    return {
+      redirect: {
+        destination: entry.target,
+        permanent: false,
+      },
+    };
+  }
+
+  const diff = now - entry.firstClick;
+  const validFor = 7 * 60 * 1000; // 7 minuten in ms
+
+  if (diff < validFor) {
+    return {
+      redirect: {
+        destination: entry.target,
+        permanent: false,
+      },
+    };
+  } else {
+    return {
+      redirect: {
+        destination: '/e',
+        permanent: false,
+      },
+    };
+  }
 }
 
-export default function RedirectPage() {
+export default function Page() {
   return null;
 }
