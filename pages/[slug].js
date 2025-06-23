@@ -1,58 +1,57 @@
 // pages/[slug].js
-import { Redis } from '@upstash/redis';
+export async function getServerSideProps(context) {
+  const { slug } = context.params;
+  const userAgent = context.req.headers['user-agent'] || '';
+  const isBot = /bot|crawl|slack|discord|whatsapp|telegram|facebook|preview|meta|link|fetch/i.test(userAgent);
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-export async function getServerSideProps({ params }) {
-  const slug = params.slug;
-  const key = `slug-${slug}`;
-  const entry = await redis.get(key);
+  const response = await fetch(`${redisUrl}/get/slug-${slug}`, {
+    headers: {
+      Authorization: `Bearer ${redisToken}`,
+    },
+  });
 
-  if (!entry) {
-    return {
-      redirect: {
-        destination: '/e',
-        permanent: false,
-      },
-    };
+  const data = await response.json();
+  if (!data?.result) {
+    return { redirect: { destination: '/e', permanent: false } };
+  }
+
+  let parsed;
+  try {
+    parsed = JSON.parse(data.result);
+  } catch {
+    return { redirect: { destination: '/e', permanent: false } };
   }
 
   const now = Date.now();
+  const validFor = 7 * 60 * 1000; // 7 minuten
 
-  if (!entry.firstClick) {
-    // eerste bezoek: sla timestamp op
-    await redis.set(key, { ...entry, firstClick: now });
-    return {
-      redirect: {
-        destination: entry.target,
-        permanent: false,
+  // Als geen firstClick én geen bot → zet firstClick
+  if (!parsed.firstClick && !isBot) {
+    await fetch(`${redisUrl}/set/slug-${slug}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${redisToken}`,
+        'Content-Type': 'application/json'
       },
-    };
+      body: JSON.stringify({ ...parsed, firstClick: now })
+    });
+
+    return { redirect: { destination: parsed.target, permanent: false } };
   }
 
-  const diff = now - entry.firstClick;
-  const validFor = 7 * 60 * 1000; // 7 minuten in ms
-
+  // Als wel firstClick → check of nog geldig
+  const diff = now - (parsed.firstClick || 0);
   if (diff < validFor) {
-    return {
-      redirect: {
-        destination: entry.target,
-        permanent: false,
-      },
-    };
-  } else {
-    return {
-      redirect: {
-        destination: '/e',
-        permanent: false,
-      },
-    };
+    return { redirect: { destination: parsed.target, permanent: false } };
   }
+
+  // Te laat
+  return { redirect: { destination: '/e', permanent: false } };
 }
 
-export default function Page() {
+export default function RedirectPage() {
   return null;
 }
