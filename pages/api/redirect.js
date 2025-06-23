@@ -1,9 +1,10 @@
-// /pages/api/redirect.js
 import fs from 'fs';
 import path from 'path';
 
 export default function handler(req, res) {
   const { slug } = req.query;
+  if (!slug) return res.redirect('/e');
+
   const dbPath = path.join(process.cwd(), 'redirects.json');
   const data = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 
