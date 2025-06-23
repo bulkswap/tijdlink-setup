@@ -1,22 +1,22 @@
 
-import redirects from '../../redirects.json';
+import redis from '../../lib/redis';
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   const { slug } = req.query;
+  const key = `redirect:${slug}`;
+  const data = await redis.get(key);
 
-  if (!slug || !redirects[slug]) {
-    return res.redirect(307, '/e'); // expired of ongeldig
+  if (!data) {
+    return res.redirect('/e');
   }
 
-  const { target, created } = redirects[slug];
-  const createdAt = new Date(created);
-  const now = new Date();
-  const diffMs = now - createdAt;
-  const diffMin = diffMs / 1000 / 60;
+  const parsed = JSON.parse(data);
+  const now = Date.now();
+  const validFor = 7 * 60 * 1000;
 
-  if (diffMin > 7) {
-    return res.redirect(307, '/e');
+  if (now - parsed.createdAt > validFor) {
+    return res.redirect('/e');
   }
 
-  return res.redirect(307, target);
+  return res.redirect(parsed.target);
 }

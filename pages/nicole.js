@@ -1,6 +1,4 @@
-// pages/nicole.js
-import fs from 'fs';
-import path from 'path';
+
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 
