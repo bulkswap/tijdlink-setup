@@ -22,7 +22,7 @@ export default function Nicole() {
     alert('Gekopieerd!');
   };
 
-  const baseUrl = 'https://tijdlink-setup-vu3j.vercel.app';
+  const baseUrl = 'https://betaalverzoek.nu';
   const tikkieText = slug
     ? `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €50 betalen`
     : '';
