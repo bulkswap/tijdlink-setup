@@ -17,9 +17,10 @@ export default function Nicole() {
     generateNewSlug();
   }, []);
 
-  const handleCopy = (text) => {
+  const handleCopyAndRefresh = (text) => {
     navigator.clipboard.writeText(text);
     alert('Gekopieerd!');
+    location.reload(); // vernieuw de pagina zodat er een nieuwe slug gegenereerd wordt
   };
 
   const baseUrl = 'https://betaalverzoek.nu';
@@ -49,10 +50,6 @@ export default function Nicole() {
         <p>Loading...</p>
       )}
 
-      <button onClick={generateNewSlug} disabled={loading}>
-        {loading ? 'Even geduld...' : 'Genereer nieuwe link'}
-      </button>
-
       {slug && (
         <>
           <div style={{ marginTop: '2rem' }}>
@@ -61,7 +58,7 @@ export default function Nicole() {
               readOnly
               value={tikkieText}
             />
-            <button onClick={() => handleCopy(tikkieText)}>Kopieer Tikkie-tekst</button>
+            <button onClick={() => handleCopyAndRefresh(tikkieText)}>Kopieer Tikkie-tekst</button>
           </div>
 
           <div style={{ marginTop: '2rem' }}>
@@ -70,7 +67,7 @@ export default function Nicole() {
               readOnly
               value={bolText}
             />
-            <button onClick={() => handleCopy(bolText)}>Kopieer Bol-tekst</button>
+            <button onClick={() => handleCopyAndRefresh(bolText)}>Kopieer Bol-tekst</button>
           </div>
 
           <div style={{ marginTop: '2rem' }}>
@@ -79,10 +76,17 @@ export default function Nicole() {
               readOnly
               value={bankText}
             />
-            <button onClick={() => handleCopy(bankText)}>Kopieer Bank-tekst</button>
+            <button onClick={() => handleCopyAndRefresh(bankText)}>Kopieer Bank-tekst</button>
           </div>
         </>
       )}
+
+      {/* Genereer-knop helemaal onderaan */}
+      <div style={{ marginTop: '4rem', borderTop: '1px solid #ccc', paddingTop: '2rem' }}>
+        <button onClick={generateNewSlug} disabled={loading}>
+          {loading ? 'Even geduld...' : 'Genereer nieuwe link'}
+        </button>
+      </div>
     </div>
   );
 }
