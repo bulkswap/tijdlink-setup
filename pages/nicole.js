@@ -25,7 +25,7 @@ export default function Nicole() {
   const handleCopyAndRefresh = (text) => {
     navigator.clipboard.writeText(text);
     alert('Gekopieerd!');
-    location.reload(); // alleen bij Tikkie-tekst
+    location.reload();
   };
 
   const baseUrl = 'https://betaalverzoek.nu';
@@ -33,7 +33,13 @@ export default function Nicole() {
     ? `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €50 betalen`
     : '';
 
-  const bolText = `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: https://beltegoed.nl/bol-com-cadeaukaart\n\nVia deze link kun je €50 betalen`;
+  const generateBolText = (amount, url) =>
+    `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: ${url}\n\nVia deze link kun je €${amount} betalen`;
+
+  const bolDefault = generateBolText(50, 'https://beltegoed.nl/bol-com-cadeaukaart');
+  const bol30 = generateBolText(30, 'https://beltegoed.nl/order?productId=56280&quantity=1');
+  const bol50 = generateBolText(50, 'https://beltegoed.nl/order?productId=56361&quantity=1');
+  const bol90 = generateBolText(90, 'https://beltegoed.nl/order?productId=88345&quantity=1');
 
   const bankText = `Liever via handmatige bankoverschrijving betalen? Dat kan ook: NL34BUNQ2106132808 tnv K. Bohak`;
 
@@ -57,24 +63,34 @@ export default function Nicole() {
 
       {slug && (
         <>
+          {/* Tikkie */}
           <div style={{ marginTop: '2rem' }}>
             <textarea
               style={{ width: '100%', height: '120px' }}
               readOnly
               value={tikkieText}
             />
-            <button onClick={() => handleCopyAndRefresh(tikkieText)}>Kopieer Tikkie-tekst</button>
+            <button onClick={() => handleCopyAndRefresh(tikkieText)}>
+              Kopieer Tikkie-tekst
+            </button>
           </div>
 
+          {/* Bol */}
           <div style={{ marginTop: '2rem' }}>
             <textarea
               style={{ width: '100%', height: '120px' }}
               readOnly
-              value={bolText}
+              value={bolDefault}
             />
-            <button onClick={() => handleCopy(bolText)}>Kopieer Bol-tekst</button>
+            <button onClick={() => handleCopy(bolDefault)}>Kopieer Bol-tekst (algemeen)</button>
+            <div style={{ marginTop: '1rem' }}>
+              <button onClick={() => handleCopy(bol30)}>Kopieer Bol-tekst (€30)</button>{' '}
+              <button onClick={() => handleCopy(bol50)}>Kopieer Bol-tekst (€50)</button>{' '}
+              <button onClick={() => handleCopy(bol90)}>Kopieer Bol-tekst (€90)</button>
+            </div>
           </div>
 
+          {/* Bank */}
           <div style={{ marginTop: '2rem' }}>
             <textarea
               style={{ width: '100%', height: '80px' }}
@@ -86,6 +102,7 @@ export default function Nicole() {
         </>
       )}
 
+      {/* Nieuwe link onderaan */}
       <div style={{ marginTop: '4rem', borderTop: '1px solid #ccc', paddingTop: '2rem' }}>
         <button onClick={generateNewSlug} disabled={loading}>
           {loading ? 'Even geduld...' : 'Genereer nieuwe link'}
