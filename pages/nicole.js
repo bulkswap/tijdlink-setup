@@ -22,11 +22,14 @@ export default function Nicole() {
     alert('Gekopieerd!');
   };
 
+  const baseUrl = 'https://tijdlink-setup-vu3j.vercel.app';
   const tikkieText = slug
-    ? `💖 Wil je mij alsjeblieft betalen voor 'Ticket' via https://tijdlink-setup-vu3j.vercel.app/${slug}\n\nVia deze link kun je €10 betalen`
+    ? `💖 Wil je mij alsjeblieft betalen voor 'Ticket' via ${baseUrl}/${slug}\n\nVia deze link kun je €10 betalen`
     : '';
 
   const bolText = `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Dit kan binnen 1 minuut via: https://beltegoed.nl/bol-com-cadeaukaart\n\nLiever via bankoverschrijving betalen? Dat kan ook: NL34BUNQ2106132808 tnv K. Bohak`;
+
+  const bankText = `💖 Liever via handmatige bankoverschrijving betalen? Dat kan ook: NL34BUNQ2106132808 tnv K. Bohak`;
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
@@ -58,7 +61,7 @@ export default function Nicole() {
               readOnly
               value={tikkieText}
             />
-            <button onClick={() => handleCopy(tikkieText)}>Kopieer Tikkie tekst</button>
+            <button onClick={() => handleCopy(tikkieText)}>Kopieer Tikkie-tekst</button>
           </div>
 
           <div style={{ marginTop: '2rem' }}>
@@ -68,6 +71,15 @@ export default function Nicole() {
               value={bolText}
             />
             <button onClick={() => handleCopy(bolText)}>Kopieer Bol-tekst</button>
+          </div>
+
+          <div style={{ marginTop: '2rem' }}>
+            <textarea
+              style={{ width: '100%', height: '80px' }}
+              readOnly
+              value={bankText}
+            />
+            <button onClick={() => handleCopy(bankText)}>Kopieer Bank-tekst</button>
           </div>
         </>
       )}
