@@ -17,10 +17,15 @@ export default function Nicole() {
     generateNewSlug();
   }, []);
 
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    alert('Gekopieerd!');
+  };
+
   const handleCopyAndRefresh = (text) => {
     navigator.clipboard.writeText(text);
     alert('Gekopieerd!');
-    location.reload(); // vernieuw de pagina zodat er een nieuwe slug gegenereerd wordt
+    location.reload(); // alleen bij Tikkie-tekst
   };
 
   const baseUrl = 'https://betaalverzoek.nu';
@@ -67,7 +72,7 @@ export default function Nicole() {
               readOnly
               value={bolText}
             />
-            <button onClick={() => handleCopyAndRefresh(bolText)}>Kopieer Bol-tekst</button>
+            <button onClick={() => handleCopy(bolText)}>Kopieer Bol-tekst</button>
           </div>
 
           <div style={{ marginTop: '2rem' }}>
@@ -76,12 +81,11 @@ export default function Nicole() {
               readOnly
               value={bankText}
             />
-            <button onClick={() => handleCopyAndRefresh(bankText)}>Kopieer Bank-tekst</button>
+            <button onClick={() => handleCopy(bankText)}>Kopieer Bank-tekst</button>
           </div>
         </>
       )}
 
-      {/* Genereer-knop helemaal onderaan */}
       <div style={{ marginTop: '4rem', borderTop: '1px solid #ccc', paddingTop: '2rem' }}>
         <button onClick={generateNewSlug} disabled={loading}>
           {loading ? 'Even geduld...' : 'Genereer nieuwe link'}
