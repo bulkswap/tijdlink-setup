@@ -27,7 +27,7 @@ export default function Nicole() {
     ? `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €50 betalen`
     : '';
 
-  const bolText = `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Dit kan binnen 1 minuut via: https://beltegoed.nl/bol-com-cadeaukaart\n\nVia deze link kun je €50 betalen`;
+  const bolText = `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: https://beltegoed.nl/bol-com-cadeaukaart\n\nVia deze link kun je €50 betalen`;
 
   const bankText = `Liever via handmatige bankoverschrijving betalen? Dat kan ook: NL34BUNQ2106132808 tnv K. Bohak`;
 
