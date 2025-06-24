@@ -10,7 +10,7 @@ const redis = new Redis({
 export default async function handler(req, res) {
   let slug;
   do {
-    slug = nanoid(10);
+    slug = nanoid(13);
   } while (await redis.get(`slug-${slug}`));
 
   await redis.set(`slug-${slug}`, {
