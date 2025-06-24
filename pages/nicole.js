@@ -5,6 +5,8 @@ export default function Nicole() {
   const [slug, setSlug] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const baseUrl = 'https://betaalverzoek.nu';
+
   const generateNewSlug = async () => {
     setLoading(true);
     const res = await fetch('/api/generate');
@@ -17,27 +19,18 @@ export default function Nicole() {
     generateNewSlug();
   }, []);
 
-  const handleCopyAndRefresh = (text) => {
-    navigator.clipboard.writeText(text);
-    alert('Gekopieerd!');
-    location.reload();
+  const handleCopy = (text, refresh = false) => {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Gekopieerd!');
+      if (refresh) location.reload();
+    });
   };
 
-  const baseUrl = 'https://betaalverzoek.nu';
+  const generateTikkieText = (amount) =>
+    `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €${amount} betalen`;
 
-  const tikkieTexts = {
-    30: (slug) => `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €30 betalen`,
-    50: (slug) => `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €50 betalen`,
-    70: (slug) => `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €70 betalen`,
-  };
-
-  const bolTexts = {
-    30: `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: https://beltegoed.nl/order?productId=56280&quantity=1\n\nVia deze link kun je €30 betalen`,
-    50: `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: https://beltegoed.nl/order?productId=56361&quantity=1\n\nVia deze link kun je €50 betalen`,
-    70: `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: https://beltegoed.nl/order?productId=88345&quantity=1\n\nVia deze link kun je €70 betalen`,
-  };
-
-  const bankText = `Liever via handmatige bankoverschrijving betalen? Dat kan ook: NL34BUNQ2106132808 tnv K. Bohak`;
+  const generateBolText = (amount, url) =>
+    `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: ${url}\n\nVia deze link kun je €${amount} betalen`;
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
@@ -48,59 +41,45 @@ export default function Nicole() {
 
       <h1>Actieve redirect link</h1>
       {slug ? (
-        <p>
-          <a href={`/${slug}`} target="_blank" rel="noopener noreferrer">
-            /{slug}
-          </a>
-        </p>
-      ) : (
-        <p>Loading...</p>
-      )}
-
-      {slug && (
         <>
-          {/* Tikkie €30 */}
+          <p>
+            <a href={`/${slug}`} target="_blank" rel="noopener noreferrer">
+              /{slug}
+            </a>
+          </p>
+
+          {/* Tikkie */}
           <div style={{ marginTop: '2rem' }}>
             <textarea
               style={{ width: '100%', height: '120px' }}
               readOnly
-              value={tikkieTexts[30](slug)}
+              value={generateTikkieText(30)}
             />
-            <button onClick={() => handleCopyAndRefresh(tikkieTexts[30](slug))}>Kopieer €30 Tikkie-tekst</button>
+            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <button onClick={() => handleCopy(generateTikkieText(30), true)}>Kopieer Tikkie-tekst</button>
+              <button onClick={() => handleCopy(generateTikkieText(50), true)}>€50</button>
+              <button onClick={() => handleCopy(generateTikkieText(70), true)}>€70</button>
+              <button onClick={() => handleCopy(generateTikkieText(90), true)}>€90</button>
+            </div>
           </div>
 
-          {/* Tikkie Extra opties */}
-          <div style={{ marginTop: '1rem' }}>
-            <button onClick={() => handleCopyAndRefresh(tikkieTexts[50](slug))}>Kopieer €50 Tikkie-tekst</button>{' '}
-            <button onClick={() => handleCopyAndRefresh(tikkieTexts[70](slug))}>Kopieer €70 Tikkie-tekst</button>
-          </div>
-
-          {/* Bol €30 */}
+          {/* Bol */}
           <div style={{ marginTop: '2rem' }}>
             <textarea
               style={{ width: '100%', height: '120px' }}
               readOnly
-              value={bolTexts[30]}
+              value={generateBolText(30, 'https://beltegoed.nl/order?productId=56280&quantity=1')}
             />
-            <button onClick={() => handleCopyAndRefresh(bolTexts[30])}>Kopieer €30 Bol-tekst</button>
-          </div>
-
-          {/* Bol Extra opties */}
-          <div style={{ marginTop: '1rem' }}>
-            <button onClick={() => handleCopyAndRefresh(bolTexts[50])}>Kopieer €50 Bol-tekst</button>{' '}
-            <button onClick={() => handleCopyAndRefresh(bolTexts[70])}>Kopieer €70 Bol-tekst</button>
-          </div>
-
-          {/* Bankoverschrijving */}
-          <div style={{ marginTop: '2rem' }}>
-            <textarea
-              style={{ width: '100%', height: '80px' }}
-              readOnly
-              value={bankText}
-            />
-            <button onClick={() => navigator.clipboard.writeText(bankText)}>Kopieer Bank-tekst</button>
+            <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <button onClick={() => handleCopy(generateBolText(30, 'https://beltegoed.nl/order?productId=56280&quantity=1'), true)}>Kopieer Bol-tekst</button>
+              <button onClick={() => handleCopy(generateBolText(50, 'https://beltegoed.nl/order?productId=56361&quantity=1'), true)}>€50</button>
+              <button onClick={() => handleCopy(generateBolText(70, 'https://beltegoed.nl/order?productId=88345&quantity=1'), true)}>€70</button>
+              <button onClick={() => handleCopy(generateBolText(90, 'https://beltegoed.nl/order?productId=88345&quantity=1'), true)}>€90</button>
+            </div>
           </div>
         </>
+      ) : (
+        <p>Loading...</p>
       )}
 
       <div style={{ marginTop: '3rem' }}>
