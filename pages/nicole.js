@@ -27,7 +27,7 @@ export default function Nicole() {
   };
 
   const generateTikkieText = (amount) =>
-    `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/pay/${slug}\n\nVia deze link kun je €${amount} betalen`;
+    `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via ${baseUrl}/${slug}\n\nVia deze link kun je €${amount} betalen`;
 
   const generateBolText = (amount, url) =>
     `💖 Wil je mij alsjeblieft betalen via bol cadeaukaart? Binnen 1 minuut via: ${url}\n\nVia deze link kun je €${amount} betalen`;
@@ -45,7 +45,7 @@ export default function Nicole() {
       {slug ? (
         <>
           <p>
-            <a href={`/pay/${slug}`} target="_blank" rel="noopener noreferrer">
+            <a href={`/${slug}`} target="_blank" rel="noopener noreferrer">
               /{slug}
             </a>
           </p>
