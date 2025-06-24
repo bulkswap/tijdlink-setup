@@ -17,7 +17,7 @@ export default function Nicole() {
   };
 
   const copyText = async () => {
-    const text = `💖 Wil je mij alsjeblieft betalen voor 'Ticket' via https://${window.location.host}/${slug}
+    const text = `💖 Wil je mij alsjeblieft betalen voor 'Tikkie' via https://${window.location.host}/${slug}
 
 Via deze link kun je €10 betalen`;
     await navigator.clipboard.writeText(text);
