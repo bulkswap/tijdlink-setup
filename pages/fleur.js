@@ -9,7 +9,7 @@ export default function Nicole() {
 
   const generateNewSlug = async () => {
     setLoading(true);
-    const res = await fetch('/api/generate');
+    const res = await fetch('/api/generate-fleur');
     const { slug: newSlug } = await res.json();
     setSlug(newSlug);
     setLoading(false);
