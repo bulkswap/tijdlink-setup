@@ -1,4 +1,3 @@
-// pages/[slug].js
 export async function getServerSideProps(context) {
   const { slug } = context.params;
   const userAgent = context.req.headers['user-agent'] || '';
@@ -22,6 +21,11 @@ export async function getServerSideProps(context) {
   try {
     parsed = JSON.parse(data.result);
   } catch {
+    return { redirect: { destination: '/e', permanent: false } };
+  }
+
+  // ✅ Nieuw: check of handmatig verlopen
+  if (parsed.expired === true) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
