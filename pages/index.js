@@ -1,7 +1,7 @@
 export async function getServerSideProps() {
   return {
     redirect: {
-      destination: 'https://www.abnamro.nl/nl/prive/internet-en-mobiel/apps/tikkie/index.html',
+      destination: 'https://www.tikkie.me/particulier',
       permanent: false,
     },
   };
