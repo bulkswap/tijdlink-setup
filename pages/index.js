@@ -10,8 +10,8 @@ export default function Home() {
       </p>
 
       <p style={{ marginTop: '1.5rem' }}>
-        ✅ Unieke, tijdelijke betaalverzoeken <br />
-        ✅ Automatische vervaldatum na openen <br />
+        ✅ Veilig, makkelijk aan te maken betaalverzoeken <br />
+        ✅ Werkt op mobiel én desktop. <br />
         ✅ Ondersteuning voor Tikkie, bank en cadeaukaarten
       </p>
 
