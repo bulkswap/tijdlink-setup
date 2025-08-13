@@ -41,7 +41,8 @@ export default function Nicole() {
         <meta name="robots" content="noindex" />
       </Head>
 
-      <h1>Warning this is a backup page, notify Admin (Click here: https://api.whatsapp.com/send/?phone=31615387114&text=%F0%9F%9A%A8+Betaallink+is+verlopen&type=phone_number&app_absent=0)</h1>
+      <h1>Warning this is a backup page, notify Admin</h1><Br><a href="https://api.whatsapp.com/send/?phone=31615387114&text=Ja+Betaallink+is+verlopen&type=phone_number&app_absent=0" target="_blank">Click here to notify admin</a>
+<br>
       {slug ? (
         <>
           <p>
