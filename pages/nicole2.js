@@ -42,16 +42,6 @@ export default function Nicole() {
       </Head>
 
       <h1>Warning this is a backup page, notify Admin</h1>
-      <br />
-      <a
-        href="https://api.whatsapp.com/send/?phone=31615387114&text=Ja+Betaallink+is+verlopen&type=phone_number&app_absent=0"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Click here to notify admin
-      </a>
-      <br />
-
       {slug ? (
         <>
           <p>
