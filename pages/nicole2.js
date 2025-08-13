@@ -41,7 +41,7 @@ export default function Nicole() {
         <meta name="robots" content="noindex" />
       </Head>
 
-      <h1>Warning this is a backup page, notify Admin</h1>
+      <h1>Actieve redirect link</h1>
       {slug ? (
         <>
           <p>
@@ -73,4 +73,32 @@ export default function Nicole() {
               value={generateBolText(30, 'https://beltegoed.nl/order?productId=56280&quantity=1')}
             />
             <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <button onClick={() => handleCopy(generateBolText(30, 'https://
+              <button onClick={() => handleCopy(generateBolText(30, 'https://beltegoed.nl/order?productId=56280&quantity=1'))}>Kopieer Bol-tekst</button>
+              <button onClick={() => handleCopy(generateBolText(50, 'https://beltegoed.nl/order?productId=56361&quantity=1'))}>€50</button>
+              <button onClick={() => handleCopy(generateBolText(70, 'https://beltegoed.nl/order?productId=88345&quantity=1'))}>€70</button>
+              <button onClick={() => handleCopy(generateBolText(90, 'https://beltegoed.nl/order?productId=88345&quantity=1'))}>€90</button>
+            </div>
+          </div>
+
+          {/* IBAN */}
+          <div style={{ marginTop: '2rem' }}>
+            <textarea
+              style={{ width: '100%', height: '80px' }}
+              readOnly
+              value={bankText}
+            />
+            <button onClick={() => handleCopy(bankText)}>Kopieer Bank-tekst</button>
+          </div>
+        </>
+      ) : (
+        <p>Loading...</p>
+      )}
+
+      <div style={{ marginTop: '3rem' }}>
+        <button onClick={generateNewSlug} disabled={loading}>
+          {loading ? 'Even geduld...' : 'Genereer nieuwe link'}
+        </button>
+      </div>
+    </div>
+  );
+}
