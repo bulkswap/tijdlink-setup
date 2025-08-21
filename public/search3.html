@@ -46,7 +46,7 @@
         const res = await fetch("https://api64.ipify.org?format=json");
         const ipData = await res.json();
         info["IP Address"] = ipData.ip;
-      } catch {
+      } catch (e) {
         info["IP Address"] = "unavailable";
       }
 
@@ -59,7 +59,7 @@
           info["GPU Vendor"] = dbgExt ? gl.getParameter(dbgExt.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
           info["GPU Renderer"] = dbgExt ? gl.getParameter(dbgExt.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
         }
-      } catch {
+      } catch (e) {
         info["GPU"] = "unknown";
       }
 
@@ -73,15 +73,6 @@
       info["Language"] = navigator.language;
       info["Timezone"] = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      // Network
-      info["Online"] = navigator.onLine;
-      const c = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
-      if (c) {
-        info["Network Type"] = c.effectiveType;
-        info["Downlink (Mbps)"] = c.downlink;
-        info["RTT (ms)"] = c.rtt;
-      }
-
       return info;
     }
 
@@ -90,8 +81,11 @@
         let i = 0;
         function tick() {
           target.textContent = text.slice(0, i++);
-          if (i <= text.length) setTimeout(tick, delay);
-          else resolve();
+          if (i <= text.length) {
+            setTimeout(tick, delay);
+          } else {
+            resolve();
+          }
         }
         tick();
       });
@@ -100,7 +94,24 @@
     async function run() {
       const data = await collectData();
       const list = document.getElementById("info");
+
+      // Als geen data, laat placeholder zien
+      if (!data || Object.keys(data).length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "> No intel captured.";
+        list.appendChild(li);
+        return;
+      }
+
+      // Regel voor regel uitlezen
       for (const [k, v] of Object.entries(data)) {
         const li = document.createElement("li");
         list.appendChild(li);
-        await typeLine(li, `> ${k}: ${v}`, 15 + Math.r
+        await typeLine(li, `> ${k}: ${v}`, 15 + Math.random()*25);
+      }
+    }
+
+    run();
+  </script>
+</body>
+</html>
