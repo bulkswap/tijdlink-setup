@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>⚠️ ACCESS DENIED ⚠️</title>
+  <style>
+    body {
+      background: black;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      padding: 40px;
+    }
+    h1 {
+      color: red;
+      text-transform: uppercase;
+      text-align: center;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    ul { list-style: none; padding: 0; margin-top: 20px; }
+    li { margin: 6px 0; white-space: pre; }
+    .warning {
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #ff0033;
+    }
+  </style>
+</head>
+<body>
+  <h1>ACCESS DENIED</h1>
+  <p>🚨 Unauthorized intrusion attempt detected 🚨</p>
+  <p>Fingerprint lock acquired. Extracting intel…</p>
+  <ul id="info"></ul>
+  <p class="warning">
+    ▶ Tracking: ACTIVE<br>
+    ▶ Countermeasures: ARMED<br>
+    ▶ Any further move will escalate response…
+  </p>
+
+  <script>
+    async function collectData() {
+      const info = {};
+
+      // IP via API
+      try {
+        const res = await fetch("https://api64.ipify.org?format=json");
+        const ipData = await res.json();
+        info["IP Address"] = ipData.ip;
+      } catch {
+        info["IP Address"] = "unavailable";
+      }
+
+      // GPU via WebGL
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          const dbgExt = gl.getExtension('WEBGL_debug_renderer_info');
+          info["GPU Vendor"] = dbgExt ? gl.getParameter(dbgExt.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+          info["GPU Renderer"] = dbgExt ? gl.getParameter(dbgExt.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+        }
+      } catch {
+        info["GPU"] = "unknown";
+      }
+
+      // System
+      info["User Agent"] = navigator.userAgent;
+      info["Platform"] = navigator.platform;
+      info["Cores"] = navigator.hardwareConcurrency || "unknown";
+      info["RAM (GB)"] = navigator.deviceMemory || "unknown";
+      info["Screen"] = `${screen.width} x ${screen.height}`;
+      info["Pixel Ratio"] = window.devicePixelRatio;
+      info["Language"] = navigator.language;
+      info["Timezone"] = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      // Network
+      info["Online"] = navigator.onLine;
+      const c = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+      if (c) {
+        info["Network Type"] = c.effectiveType;
+        info["Downlink (Mbps)"] = c.downlink;
+        info["RTT (ms)"] = c.rtt;
+      }
+
+      return info;
+    }
+
+    function typeLine(target, text, delay=20) {
+      return new Promise(resolve => {
+        let i = 0;
+        function tick() {
+          target.textContent = text.slice(0, i++);
+          if (i <= text.length) setTimeout(tick, delay);
+          else resolve();
+        }
+        tick();
+      });
+    }
+
+    async function run() {
+      const data = await collectData();
+      const list = document.getElementById("info");
+      for (const [k, v] of Object.entries(data)) {
+        const li = document.createElement("li");
+        list.appendChild(li);
+        await typeLine(li, `> ${k}: ${v}`, 15 + Math.r
