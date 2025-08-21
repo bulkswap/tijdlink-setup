@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>⚠️ ACCESS DENIED ⚠️</title>
+  <style>
+    body {
+      background: black;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      padding: 40px;
+    }
+    h1 {
+      color: red;
+      text-transform: uppercase;
+      text-align: center;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    ul { list-style: none; padding: 0; margin-top: 20px; }
+    li { margin: 6px 0; }
+    .warning {
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #ff0033;
+    }
+  </style>
+</head>
+<body>
+  <h1>ACCESS DENIED</h1>
+  <p>🚨 Intrusion attempt detected 🚨</p>
+  <p>We’ve locked onto your digital fingerprint. The following intel has been captured:</p>
+  <ul id="info"></ul>
+  <p class="warning">
+    ▶ Tracking: ACTIVE<br>
+    ▶ Countermeasures: ARMED<br>
+    ▶ Further moves will escalate system response…
+  </p>
+  <script>
+    async function collectData() {
+      const info = {};
+
+      // Browser & OS
+      info["User Agent"] = navigator.userAgent;
+      info["Platform"] = navigator.platform;
+      info["Vendor"] = navigator.vendor;
+      info["Product"] = navigator.product;
+
+      // Hardware
+      info["CPU Cores"] = navigator.hardwareConcurrency || "unknown";
+      info["RAM (GB)"] = navigator.deviceMemory || "unknown";
+      info["Touch Points"] = navigator.maxTouchPoints;
+      info["Device Pixel Ratio"] = window.devicePixelRatio;
+
+      // Screen
+      info["Screen Size"] = `${screen.width} x ${screen.height}`;
+      info["Available Screen"] = `${screen.availWidth} x ${screen.availHeight}`;
+      info["Color Depth"] = screen.colorDepth;
+      info["Pixel Depth"] = screen.pixelDepth;
+      info["Orientation"] = screen.orientation?.type || "n/a";
+
+      // Locale
+      info["Language"] = navigator.language;
+      info["Languages"] = navigator.languages.join(", ");
+      info["Timezone"] = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      // Network
+      info["Online"] = navigator.onLine;
+      const c = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+      if (c) {
+        info["Network Type"] = c.effectiveType;
+        info["Downlink (Mbps)"] = c.downlink;
+        info["RTT (ms)"] = c.rtt;
+      }
+
+      // Storage
+      if (navigator.storage && navigator.storage.estimate) {
+        try {
+          const est = await navigator.storage.estimate();
+          info["Storage Quota (MB)"] = Math.round(est.quota / 1024 / 1024);
+          info["Storage Used (MB)"] = Math.round(est.usage / 1024 / 1024);
+        } catch {}
+      }
+
+      // WebGL fingerprint (GPU hint)
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          const dbgExt = gl.getExtension('WEBGL_debug_renderer_info');
+          const vendor = dbgExt ? gl.getParameter(dbgExt.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+          const renderer = dbgExt ? gl.getParameter(dbgExt.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+          info["GPU Vendor"] = vendor;
+          info["GPU Renderer"] = renderer;
+        }
+      } catch {}
+
+      return info;
+    }
+
+    collectData().then(info => {
+      const list = document.getElementById("info");
+      Object.entries(info).forEach(([k,v])=>{
+        const li = document.createElement("li");
+        li.textContent = `> ${k}: ${v}`;
+        list.appendChild(li);
+      });
+    });
+  </script>
+</body>
+</html>
