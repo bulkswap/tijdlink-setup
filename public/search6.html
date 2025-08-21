@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>⚠️ ACCESS DENIED ⚠️</title>
+<style>
+  :root { --bg:#000; --green:#00ff00; --red:#ff0033; }
+  body{
+    background:var(--bg);color:var(--green);
+    font-family:"Courier New", monospace;
+    padding:40px 24px;max-width:1100px;margin:0 auto;
+  }
+  h1{
+    text-transform:uppercase;
+    text-align:center;
+    color:var(--red);
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50%{opacity:0;} }
+
+  .lead{margin:12px 0 18px;}
+  .scan{margin:12px 0 16px;color:#b6ffb6;min-height:1.2em}
+  .muted{color:#7cff7c}
+  ul{list-style:none;padding:0;margin:10px 0 28px}
+  li{margin:6px 0;white-space:pre}
+  .warn{color:var(--red);margin-top:26px;line-height:1.7}
+  .bullet::before{content:"▶ ";color:var(--red)}
+  .divider{border-top:1px dashed #0a0;margin:16px 0;opacity:.6}
+</style>
+</head>
+<body>
+  <h1>ACCESS DENIED</h1>
+  <p class="lead">🚨 Unauthorized intrusion attempt detected 🚨</p>
+  <p class="muted">Fingerprint lock acquired. Extracting intel…</p>
+
+  <div id="scan" class="scan"></div>
+  <ul id="info"></ul>
+
+  <div class="divider"></div>
+  <p class="warn">
+    <span class="bullet"></span>Tracking: <b>ACTIVE</b><br>
+    <span class="bullet"></span>Countermeasures: <b>ARMED</b><br>
+    <span class="bullet"></span>Any further move will escalate response…
+  </p>
+
+<script>
+(function(){
+  const $scan = document.getElementById('scan');
+  const $list = document.getElementById('info');
+  const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+  async function typeLine(text, min=10, max=25){
+    const li = document.createElement('li'); $list.appendChild(li);
+    for(let i=0;i<=text.length;i++){
+      li.textContent = text.slice(0,i);
+      await sleep(min + Math.random()*(max-min));
+    }
+  }
+
+  // Fake scan progress
+  (async function scanBar(){
+    let pct=0;
+    while(pct<100){
+      const bars="██████████████████████████".slice(0,Math.floor(pct/4));
+      const pad ="░░░░░░░░░░░░░░░░░░░░░░░░".slice(Math.floor(pct/4));
+      $scan.textContent=`Scanning system ${bars}${pad} ${pct}%`;
+      pct+=5+Math.floor(Math.random()*8);
+      await sleep(90+Math.random()*140);
+    }
+    $scan.textContent="Scan complete. Displaying intel ↓";
+  })();
+
+  // IP via fallback
+  async function getIP(){
+    const sources=[
+      "https://api64.ipify.org?format=json",
+      "https://api.ipify.org?format=json",
+      "https://ipv4.icanhazip.com"
+    ];
+    for (const url of sources){
+      try {
+        const r=await fetch(url,{cache:"no-store"});
+        const t=url.includes("icanhazip")?await r.text():await r.json();
+        return (t.ip||t).trim();
+      } catch{}
+    }
+    return "unavailable";
+  }
+
+  async function collect(){
+    const rows=[];
+    rows.push(["IP Address", await getIP()]);
+
+    // GPU
+    try{
+      const canvas=document.createElement('canvas');
+      const gl=canvas.getContext('webgl');
+      if(gl){
+        const dbg=gl.getExtension('WEBGL_debug_renderer_info');
+        const vendor=dbg?gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL):gl.getParameter(gl.VENDOR);
+        const renderer=dbg?gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);
+        rows.push(["GPU Vendor",vendor]); rows.push(["GPU Renderer",renderer]);
+      }
+    }catch{}
+
+    rows.push(["User Agent",navigator.userAgent]);
+    rows.push(["Platform",navigator.platform]);
+    rows.push(["Cores",navigator.hardwareConcurrency||"unknown"]);
+    rows.push(["RAM (GB)",navigator.deviceMemory||"unknown"]);
+    rows.push(["Screen",`${screen.width} x ${screen.height}`]);
+    rows.push(["Pixel Ratio",window.devicePixelRatio]);
+    rows.push(["Language",navigator.language]);
+    rows.push(["Timezone",Intl.DateTimeFormat().resolvedOptions().timeZone]);
+
+    return rows;
+  }
+
+  (async function run(){
+    const rows=await collect();
+    for(const [k,v] of rows){
+      await typeLine(`> ${k}: ${v}`);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
