@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>⚠️ ACCESS DENIED ⚠️</title>
+<style>
+  :root { --bg:#000; --green:#00ff00; --red:#ff0033; }
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--green);font-family:"Courier New",ui-monospace,monospace;padding:40px 24px;max-width:1100px;margin:0 auto}
+  h1{text-transform:uppercase;text-align:center;letter-spacing:2px;color:var(--red);position:relative;display:inline-block;left:50%;transform:translateX(-50%)}
+  .glitch:before,.glitch:after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;background:var(--bg);overflow:hidden;clip-path:inset(0 0 0 0)}
+  .glitch:before{color:#f00;animation:gl1 2s infinite linear alternate-reverse}
+  .glitch:after{color:#0ff;animation:gl2 1.6s infinite linear alternate-reverse}
+  @keyframes gl1{0%{clip-path:inset(0 0 85% 0);transform:translate(-2px,-1px)}20%{clip-path:inset(0 0 10% 0);transform:translate(2px,1px)}40%{clip-path:inset(0 0 60% 0);transform:translate(-1px,0)}60%{clip-path:inset(0 0 30% 0);transform:translate(1px,0)}80%{clip-path:inset(0 0 80% 0);transform:translate(-3px,1px)}100%{clip-path:inset(0 0 5% 0);transform:translate(0,0)}}
+  @keyframes gl2{0%{clip-path:inset(85% 0 0 0);transform:translate(1px,1px)}25%{clip-path:inset(10% 0 0 0);transform:translate(-1px,-1px)}50%{clip-path:inset(60% 0 0 0);transform:translate(0,1px)}75%{clip-path:inset(30% 0 0 0);transform:translate(1px,0)}100%{clip-path:inset(5% 0 0 0);transform:translate(-1px,0)}}
+  .lead{margin:12px 0 18px}.scan{margin:12px 0 16px;color:#b6ffb6;min-height:1.2em}
+  .muted{color:#7cff7c}ul{list-style:none;padding:0;margin:10px 0 28px}
+  li{margin:6px 0;white-space:pre}
+  .warn{color:var(--red);margin-top:26px;line-height:1.7}.bullet::before{content:"▶ ";color:var(--red)}
+  .divider{border-top:1px dashed #0a0;margin:16px 0;opacity:.6}
+</style>
+</head>
+<body>
+  <h1 class="glitch" data-text="ACCESS DENIED">ACCESS DENIED</h1>
+  <p class="lead">🚨 Unauthorized intrusion attempt detected 🚨</p>
+  <p class="muted">Fingerprint lock acquired. Extracting intel…</p>
+
+  <div id="scan" class="scan"></div>
+  <ul id="info"></ul>
+
+  <div class="divider"></div>
+  <p class="warn">
+    <span class="bullet"></span>Tracking: <b>ACTIVE</b><br>
+    <span class="bullet"></span>Countermeasures: <b>ARMED</b><br>
+    <span class="bullet"></span>Any further move will escalate response…
+  </p>
+
+  <script>
+  (function(){
+    const $scan = document.getElementById('scan');
+    const $list = document.getElementById('info');
+
+    // --- Utils
+    const sleep = ms => new Promise(r=>setTimeout(r,ms));
+    const safe = fn => { try { return fn(); } catch { return undefined; } };
+    async function typeLine(text, min=10, max=30){
+      const li = document.createElement('li'); $list.appendChild(li);
+      for(let i=0;i<=text.length;i++){
+        li.textContent = text.slice(0,i);
+        await sleep(min + Math.random()*(max-min));
+      }
+    }
+
+    // --- Fake scan progress (never blocks)
+    (async function scanBar(){
+      let pct=0;
+      while(pct<100){
+        const bars = "██████████████████████████████████████".slice(0, Math.floor(pct/3));
+        const pad  = "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░".slice(Math.floor(pct/3));
+        $scan.textContent = `Scanning system ${bars}${pad}  ${pct}%`;
+        pct += 3 + Math.floor(Math.random()*8);
+        await sleep(90 + Math.random()*130);
+      }
+      $scan.textContent = "Scan complete. Displaying intel ↓";
+    })();
+
+    // --- Robust IP fetch with fallbacks + timeouts
+    async function fetchWithTimeout(url, ms){
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), ms);
+      try { const r = await fetch(url, { signal: ctrl.signal, cache: "no-store", mode: "cors" });
+            clearTimeout(t); return r; }
+      catch(e){ clearTimeout(t); throw e; }
+    }
+    async function getIP(){
+      const sources = [
+        async ()=> (await (await fetchWithTimeout("https://api64.ipify.org?format=json", 2500)).json()).ip,
+        async ()=> (await (await fetchWithTimeout("https://api.ipify.org?format=json", 2500)).json()).ip,
+        async ()=> (await (await fetchWithTimeout("https://ipv4.icanhazip.com", 2500)).text()).trim()
+      ];
+      for (const s of sources){
+        try { const ip = await s(); if (ip) return ip; } catch {}
+      }
+      return "unavailable";
+    }
+
+    // --- Collect data (never throws)
+    async function collect(){
+      const rows = [];
+      rows.push(["IP Address", await getIP()]);
+
+      // GPU (best-effort)
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl){
+          const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+          const vendor = dbg ? gl.getParameter(dbg.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
+          const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+          if (vendor)  rows.push(["GPU Vendor", vendor]);
+          if (renderer)rows.push(["GPU Renderer", renderer]);
+        }
+      } catch {}
+
+      rows.push(["User Agent", safe(()=>navigator.userAgent) || "unknown"]);
+      rows.push(["Platform", safe(()=>navigator.platform) || "unknown"]);
+      rows.push(["Cores", safe(()=>navigator.hardwareConcurrency) || "unknown"]);
+      rows.push(["RAM (GB)", safe(()=>navigator.deviceMemory) || "unknown"]);
+      rows.push(["Screen", safe(()=>`${screen.width} x ${screen.height}`) || "unknown"]);
+      rows.push(["Pixel Ratio", safe(()=>window.devicePixelRatio) || "unknown"]);
+      rows.push(["Language", safe(()=>navigator.language) || "unknown"]);
+      rows.push(["Timezone", safe(()=>Intl.DateTimeFormat().resolvedOptions().timeZone) || "unknown"]);
+
+      const c = safe(()=>navigator.connection || navigator.webkitConnection || navigator.mozConnection);
+      if (c){
+        if (c.effectiveType) rows.push(["Network Type", c.effectiveType]);
+        if (c.downlink)      rows.push(["Downlink (Mbps)", c.downlink]);
+        if (c.rtt)           rows.push(["RTT (ms)", c.rtt]);
+      }
+      return rows;
+    }
+
+    // --- Run
+    (async function run(){
+      try{
+        const rows = await collect();
+        // Begin meteen met typen, onafhankelijk van scanbar
+        for (const [k,v] of rows){
+          await typeLine(`> ${k}: ${v}`, 12, 28);
+        }
+      } catch (e){
+        await typeLine("> Intel capture failed. Minimal logging only.");
+      }
+    })();
+  })();
+  </script>
+</body>
+</html>
