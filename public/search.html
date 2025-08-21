@@ -1,80 +1,58 @@
 <!doctype html>
 <html lang="nl">
-<meta charset="utf-8" />
-<title>Searching..</title>
-<style>
-  body { font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding: 24px; max-width: 900px; margin: auto; }
-  h1 { margin-top: 0; }
-  pre { background: #f6f6f7; padding: 16px; border-radius: 8px; overflow: auto; }
-  .kv { display: grid; grid-template-columns: 280px 1fr; gap: 6px 12px; }
-  .kv div:nth-child(odd) { color: #444; }
-  .muted { color: #666; }
-</style>
-<h1>Browser & apparaat-info</h1>
-<div id="grid" class="kv"></div>
-<h2>Storage-schatting</h2>
-<pre id="storage" class="muted">laden…</pre>
-<h2>WebGL renderer</h2>
-<pre id="webgl" class="muted">laden…</pre>
-<script>
-(async () => {
-  const grid = document.getElementById('grid');
-  const add = (k, v) => {
-    const kd = document.createElement('div'); kd.textContent = k;
-    const vd = document.createElement('div'); vd.textContent = v ?? '—';
-    grid.append(kd, vd);
-  };
-
-  const uaData = navigator.userAgentData || {};
-  add('User Agent', navigator.userAgent);
-  add('UA-CH brands', uaData.brands ? uaData.brands.map(b => `${b.brand} ${b.version}`).join(', ') : 'n.v.t.');
-  add('UA-CH platform', uaData.platform || 'n.v.t.');
-  add('Platform', navigator.platform);
-  add('Vendor', navigator.vendor);
-  add('Product', navigator.product);
-  add('Taal', navigator.language + (navigator.languages ? ` (${navigator.languages.join(', ')})` : ''));
-  add('Tijdzone', Intl.DateTimeFormat().resolvedOptions().timeZone);
-  add('Online', String(navigator.onLine));
-  add('Cookie enabled', String(navigator.cookieEnabled));
-  add('Cores (hardwareConcurrency)', navigator.hardwareConcurrency);
-  add('Device memory (GB)', navigator.deviceMemory || 'n.v.t.');
-  add('Max touch points', navigator.maxTouchPoints);
-  add('Venster (inner)', `${window.innerWidth} × ${window.innerHeight}`);
-  add('Scherm (CSS px)', `${screen.width} × ${screen.height}`);
-  add('Avail screen', `${screen.availWidth} × ${screen.availHeight}`);
-  add('Device Pixel Ratio', window.devicePixelRatio);
-  add('Color depth', screen.colorDepth);
-  add('Pixel depth', screen.pixelDepth);
-  add('Screen orientation', screen.orientation?.type || 'n.v.t.');
-  // Netwerk (beperkt ondersteund)
-  const c = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
-  add('Network (type)', c?.effectiveType || 'n.v.t.');
-  add('Network (downlink Mbps)', c?.downlink || 'n.v.t.');
-
-  // Storage estimate
-  const storageEl = document.getElementById('storage');
-  try {
-    const est = await (navigator.storage && navigator.storage.estimate ? navigator.storage.estimate() : Promise.resolve(null));
-    storageEl.textContent = est ? JSON.stringify({
-      quota_bytes: est.quota, usage_bytes: est.usage
-    }, null, 2) : 'Niet ondersteund.';
-  } catch (e) {
-    storageEl.textContent = 'Fout bij uitlezen storage.';
-  }
-
-  // WebGL renderer/vendor
-  const webglEl = document.getElementById('webgl');
-  try {
-    const canvas = document.createElement('canvas');
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-    if (!gl) throw new Error('WebGL niet beschikbaar');
-    const dbgExt = gl.getExtension('WEBGL_debug_renderer_info');
-    const vendor = dbgExt ? gl.getParameter(dbgExt.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
-    const renderer = dbgExt ? gl.getParameter(dbgExt.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
-    webglEl.textContent = JSON.stringify({ vendor, renderer }, null, 2);
-  } catch (e) {
-    webglEl.textContent = 'WebGL niet beschikbaar of geblokkeerd.';
-  }
-})();
-</script>
+<head>
+  <meta charset="utf-8">
+  <title>⚠️ ACCESS DENIED ⚠️</title>
+  <style>
+    body {
+      background: black;
+      color: #00ff00;
+      font-family: "Courier New", monospace;
+      padding: 40px;
+    }
+    h1 {
+      color: red;
+      text-transform: uppercase;
+      text-align: center;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    ul { list-style: none; padding: 0; margin-top: 20px; }
+    li { margin: 6px 0; }
+    .warning {
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #ff0033;
+    }
+  </style>
+</head>
+<body>
+  <h1>ACCESS DENIED</h1>
+  <p>🚨 Unauthorized activity detected 🚨</p>
+  <p>We’ve locked onto your digital fingerprint. The following intel is already logged:</p>
+  <ul id="info"></ul>
+  <p class="warning">
+    ▶ Tracking active<br>
+    ▶ Intrusion flagged<br>
+    ▶ Further moves will escalate countermeasures…
+  </p>
+  <script>
+    const info = {
+      "Browser": navigator.userAgent,
+      "Platform": navigator.platform,
+      "CPU Cores": navigator.hardwareConcurrency || "unknown",
+      "RAM (GB)": navigator.deviceMemory || "unknown",
+      "Screen": `${screen.width} x ${screen.height}`,
+      "Pixel Ratio": window.devicePixelRatio,
+      "Language": navigator.language,
+      "Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+    const list = document.getElementById("info");
+    Object.entries(info).forEach(([k,v])=>{
+      const li = document.createElement("li");
+      li.textContent = `> ${k}: ${v}`;
+      list.appendChild(li);
+    });
+  </script>
+</body>
 </html>
