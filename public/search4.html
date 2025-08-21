@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>⚠️ ACCESS DENIED ⚠️</title>
+<style>
+  :root { --bg:#000; --green:#00ff00; --red:#ff0033; }
+  html,body { height:100%; }
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    padding: 40px 24px; max-width: 1100px; margin: 0 auto;
+  }
+  h1 {
+    text-transform: uppercase; text-align:center; letter-spacing:2px;
+    color: var(--red); position: relative; display:inline-block; left:50%;
+    transform: translateX(-50%);
+  }
+  /* glitch title */
+  .glitch:before, .glitch:after {
+    content: attr(data-text); position: absolute; left:0; top:0; width:100%;
+    background: var(--bg); overflow:hidden; clip-path: inset(0 0 0 0);
+  }
+  .glitch:before { color:#f00; animation:gl1 2s infinite linear alternate-reverse; }
+  .glitch:after  { color:#0ff; animation:gl2 1.6s infinite linear alternate-reverse; }
+  @keyframes gl1 {
+    0%{ clip-path: inset(0 0 85% 0); transform: translate(-2px,-1px); }
+    20%{ clip-path: inset(0 0 10% 0); transform: translate(2px,1px); }
+    40%{ clip-path: inset(0 0 60% 0); transform: translate(-1px,0); }
+    60%{ clip-path: inset(0 0 30% 0); transform: translate(1px,0); }
+    80%{ clip-path: inset(0 0 80% 0); transform: translate(-3px,1px); }
+    100%{ clip-path: inset(0 0 5% 0); transform: translate(0,0); }
+  }
+  @keyframes gl2 {
+    0%{ clip-path: inset(85% 0 0 0); transform: translate(1px,1px); }
+    25%{ clip-path: inset(10% 0 0 0); transform: translate(-1px,-1px); }
+    50%{ clip-path: inset(60% 0 0 0); transform: translate(0,1px); }
+    75%{ clip-path: inset(30% 0 0 0); transform: translate(1px,0); }
+    100%{ clip-path: inset(5% 0 0 0); transform: translate(-1px,0); }
+  }
+
+  .lead { margin: 12px 0 18px; }
+  .scan { margin: 12px 0 16px; color:#b6ffb6; min-height: 1.2em; }
+  .muted { color:#7cff7c; }
+  ul { list-style:none; padding:0; margin: 10px 0 28px; }
+  li { margin: 6px 0; white-space: pre; }
+  .warn {
+    color: var(--red); margin-top: 26px; line-height:1.7;
+  }
+  .bullet::before { content:"▶ "; color: var(--red); }
+  .divider { border-top:1px dashed #0a0; margin:16px 0; opacity:.6; }
+</style>
+</head>
+<body>
+  <h1 class="glitch" data-text="ACCESS DENIED">ACCESS DENIED</h1>
+
+  <p class="lead">🚨 Unauthorized intrusion attempt detected 🚨</p>
+  <p class="muted">Fingerprint lock acquired. Extracting intel…</p>
+
+  <div id="scan" class="scan"></div>
+  <ul id="info"></ul>
+
+  <div class="divider"></div>
+  <p class="warn">
+    <span class="bullet"></span>Tracking: <b>ACTIVE</b><br>
+    <span class="bullet"></span>Countermeasures: <b>ARMED</b><br>
+    <span class="bullet"></span>Any further move will escalate response…
+  </p>
+
+  <!-- short beep (may require user gesture on some browsers) -->
+  <audio id="beep" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+  </audio>
+
+<script>
+(async function(){
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  const infoList = document.getElementById('info');
+  const scan = document.getElementById('scan');
+  const beep = document.getElementById('beep');
+
+  // Fake scan bar
+  (async () => {
+    let pct = 0;
+    while (pct <= 100) {
+      const bars = "██████████████████████████".slice(0, Math.floor(pct/4));
+      const pad = "░░░░░░░░░░░░░░░░░░░░░░░░".slice(Math.floor(pct/4));
+      scan.textContent = `Scanning system ${bars}${pad}  ${pct}%`;
+      pct += Math.floor(3 + Math.random()*7);
+      await sleep(100 + Math.random()*120);
+    }
+    scan.textContent = "Scan complete. Displaying intel ↓";
+  })();
+
+  // Typewriter line
+  async function typeLine(text, delay=12){
+    const li = document.c
