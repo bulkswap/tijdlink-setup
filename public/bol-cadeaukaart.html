@@ -3,189 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Betaalverzoek - €50 Bol Cadeaukaart</title>
+    <title>€50 Bol.com cadeaukaart – Fleur Jongkamp</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f9ff 0%, #e8fff8 100%);
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
             min-height: 100vh;
-            padding-top: 20px;
+            color: #2d1b4e;
         }
-        .container {
+        .card {
             max-width: 380px;
             width: 100%;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
             overflow: hidden;
-            margin: 0 10px;
+            margin: 20px 16px;
         }
         .header {
-            background: linear-gradient(135deg, #ff6b00, #ff8c00); /* Oranje Tikkie-stijl */
-            color: white;
-            padding: 24px 20px;
+            background: linear-gradient(120deg, #a8e6cf, #d4a5ff);
+            padding: 32px 24px 40px;
             text-align: center;
+            color: #2d1b4e;
         }
         .header h1 {
-            margin: 0 0 4px;
-            font-size: 20px;
+            margin: 0 0 8px;
+            font-size: 22px;
             font-weight: 600;
         }
         .header p {
             margin: 0;
+            font-size: 15px;
             opacity: 0.9;
-            font-size: 14px;
         }
         .content {
-            padding: 32px 24px;
+            padding: 32px 28px;
             text-align: center;
         }
         .amount {
-            font-size: 52px;
-            font-weight: 700;
-            color: #28a745; /* Groen voor bedrag */
-            margin: 0 0 16px;
-            letter-spacing: -1px;
-        }
-        .description {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 24px;
-            line-height: 1.4;
-        }
-        .recipient {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 24px 0;
-            font-size: 16px;
-            border-left: 4px solid #ff6b00;
-        }
-        .recipient strong {
-            color: #ff6b00;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .recipient small {
-            color: #999;
-            font-size: 14px;
-        }
-        .qr-placeholder {
-            background: #e9ecef;
-            border: 2px dashed #999;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            color: #999;
-            font-size: 14px;
-        }
-        .pay-button {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 18px 32px;
-            font-size: 18px;
-            font-weight: 600;
-            border-radius: 12px;
-            width: 100%;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-        .pay-button:hover {
-            background: #218838;
-            transform: translateY(-1px);
-        }
-        .pay-button:active {
-            transform: translateY(0);
-        }
-        .loading {
-            display: none;
-            margin-top: 10px;
-            font-size: 14px;
-            color: #28a745;
-        }
-        .spinner {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #28a745;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 8px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .footer {
-            padding: 20px 24px;
-            text-align: center;
-            font-size: 12px;
-            color: #999;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-        }
-        .icon {
-            font-size: 24px;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        @media (max-width: 480px) {
-            .amount { font-size: 44px; }
-            .header { padding: 20px 16px; }
-            .content { padding: 24px 16px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🔔 Betaalverzoek</h1>
-            <p>Van jou ontvangen</p>
-        </div>
-        <div class="content">
-            <div class="amount">€50,00</div>
-            <div class="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
-            <div class="recipient">
-                <strong>Voor Fleur</strong>
-                <small>Op verzoek van [Jouw Naam]</small>
-            </div>
-            <div class="qr-placeholder">
-                📱 Scan QR-code om te betalen<br>
-                (Placeholder voor echte QR)
-            </div>
-            <a href="https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB" class="pay-button" id="payBtn">
-                Betalen met iDEAL
-            </a>
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                Wordt doorgestuurd naar Buckaroo...
-            </div>
-        </div>
-        <div class="footer">
-            <p>Veilig en snel via iDEAL • Geen extra kosten • Powered by Tikkie-stijl</p>
-        </div>
-    </div>
-    <script>
-        document.getElementById('payBtn').addEventListener('click', function(e) {
-            e.preventDefault(); // Voorkom directe navigatie voor animatie
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('payBtn').style.display = 'none';
-            setTimeout(() => {
-                window.location.href = this.href;
-            }, 1500); // 1.5s laadvertraging voor smooth feel
-        });
-    </script>
-</body>
-</html>
+            font-size: 56px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #55efc4, #a29bfe
