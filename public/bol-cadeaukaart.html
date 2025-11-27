@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Betaalverzoek – Bol.com cadeaukaart</title>
+    <title>Betaalverzoek</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{
             font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
             background:linear-gradient(135deg,#f5f9ff 0%,#e8fff8 100%);
-            min-height:100vh;color:#2d1b4e;padding:8px 8px 40px;
+            min-height:100vh;color:#2d1b4e;padding:8px 8px 60px;
         }
         .card{
-            max-width:380px;width:100%;margin:0 auto 32px;background:white;border-radius:20px;
+            max-width:380px;width:100%;margin:0 auto 20px;background:white;border-radius:20px;
             box-shadow:0 12px 30px rgba(0,0,0,0.1);overflow:hidden;
         }
         .header{background:linear-gradient(120deg,#a8e6cf,#d4a5ff);padding:28px 20px 32px;text-align:center;color:#2d1b4e;}
@@ -34,37 +34,32 @@
         .pay-button img{height:28px;margin-left:12px;}
         .footer{padding:16px;font-size:12px;color:#777;background:#f9f9ff;text-align:center;line-height:1.6;}
         .footer a{color:#00b894;text-decoration:none;}
-
         .tooltip{position:relative;cursor:help;display:inline-block;}
         .tooltip:hover::after,.tooltip:active::after{
             content:attr(data-text);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
             margin-bottom:8px;background:#333;color:#fff;padding:7px 11px;border-radius:8px;
-            font-size:13.5px;white-space:nowrap;z-index:10;
-        }
+            font-size:13.5px;white-space:nowrap;z-index:10;}
         .tooltip:hover::before,.tooltip:active::before{
             content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
-            margin-bottom:2px;border:6px solid transparent;border-top-color:#333;z-index:10;
-        }
+            margin-bottom:2px;border:6px solid transparent;border-top-color:#333;z-index:10;}
 
-        /* FAQ helemaal los onder de kaart – net als Tikkie */
-        .faq-section{
-            max-width:380px;margin:0 auto;padding:0 12px;
+        /* Subtiele FAQ – helemaal onderaan, klein en grijs */
+        .subtle-faq{
+            max-width:380px;margin:60px auto 0;padding:0 12px;opacity:0.65;
         }
-        .faq-section h3{
-            text-align:center;font-size:18px;font-weight:600;margin:24px 0 16px;color:#2d1b4e;
+        .subtle-faq details{margin-bottom:8px;}
+        .subtle-faq summary{
+            font-size:14px;color:#666;padding:10px 0;cursor:pointer;list-style:none;
+            position:relative;padding-right:24px;
         }
-        .faq details{background:white;margin-bottom:8px;border-radius:12px;overflow:hidden;
-            box-shadow:0 2px 8px rgba(0,0,0,0.06);}
-        .faq summary{
-            padding:16px 20px;font-size:15px;font-weight:600;color:#333;
-            cursor:pointer;list-style:none;position:relative;
+        .subtle-faq summary::after{
+            content:"+";position:absolute;right:0;top:50%;transform:translateY(-50%);
+            font-size:18px;color:#aaa;transition:.2s;
         }
-        .faq summary::after{
-            content:"+";position:absolute;right:20px;top:50%;transform:translateY(-50%);
-            font-size:22px;color:#777;transition:.2s;
+        .subtle-faq details[open] summary::after{content:"−";}
+        .subtle-faq p{
+            font-size:13.5px;color:#777;line-height:1.5;padding:0 0 12px 0;
         }
-        .faq details[open] summary::after{content:"−";}
-        .faq p{padding:0 20px 16px 20px;color:#555;font-size:14.5px;line-height:1.5;}
     </style>
 </head>
 <body>
@@ -95,29 +90,8 @@
     </div>
 </div>
 
-<!-- Veelgestelde vragen helemaal los onder de kaart -->
-<div class="faq-section">
-    <h3>Veelgestelde vragen</h3>
-
-    <div class="faq">
-        <details>
-            <summary>Hoe werkt de betaling?</summary>
-            <p>Je betaalt via iDEAL. De betaling wordt veilig verwerkt door een betaalprovider.</p>
-        </details>
-        <details>
-            <summary>Waarom staat de ontvanger op deze pagina?</summary>
-            <p>Je koopt een cadeaukaart die direct naar de ontvanger wordt gestuurd.</p>
-        </details>
-        <details>
-            <summary>Ontvangt de ontvanger mijn gegevens?</summary>
-            <p>Nee, de ontvanger ziet alleen dat je hebt betaald.</p>
-        </details>
-        <details>
-            <summary>Wanneer ontvangt de ontvanger het product?</summary>
-            <p>Direct na afronding van de betaling.</p>
-        </details>
-    </div>
-</div>
-
-</body>
-</html>
+<!-- Super subtiele FAQ, ver onder de fold -->
+<div class="subtle-faq">
+    <details><summary>Hoe werkt de betaling?</summary><p>Je betaalt via iDEAL. De betaling wordt veilig verwerkt door een betaalprovider.</p></details>
+    <details><summary>Waarom staat de ontvanger op deze pagina?</summary><p>Je koopt een cadeaukaart die direct naar de ontvanger wordt gestuurd.</p></details>
+    <details><summary>Ontvangt de ontv
