@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Betaalverzoek</title>
+    <title>Betaalverzoek – Bol.com cadeaukaart</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
@@ -43,4 +43,54 @@
             content:attr(data-phone);
             position:absolute;top:-40px;left:50%;transform:translateX(-50%);
             background:#333;color:white;padding:8px 14px;border-radius:10px;
-            font-size:14px;white-space:nowrap;z
+            font-size:14px;white-space:nowrap;z-index:10;
+        }
+        .check{color:#00b894;font-weight:bold;margin-left:6px;font-size:20px;}
+        .pay-button{
+            background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;
+            font-size:18px;font-weight:700;padding:18px 24px;border:none;border-radius:16px;
+            width:100%;text-decoration:none;display:flex;align-items:center;justify-content:center;
+            box-shadow:0 8px 20px rgba(85,239,196,0.3);transition:all .2s;
+        }
+        .pay-button:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(85,239,196,0.4);}
+        .pay-button img{height:30px;margin-left:12px;}
+        .footer{
+            padding:20px;font-size:12.5px;color:#777;background:#f9f9ff;text-align:center;line-height:1.7;
+        }
+        .footer a{color:#00b894;text-decoration:none;}
+        .footer a:hover{text-decoration:underline;}
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header">
+        <h1>Betaalverzoek</h1>
+        <p>Eenvoudig, snel én veilig betalen.</p>
+    </div>
+
+    <div class="content">
+        <div class="amount">€50,00</div>
+        <div class="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
+
+        <div class="recipient">
+            Ontvanger<br>
+            <strong data-phone="0612345678">Fleur Jongkamp <span class="check">✓</span></strong>
+        </div>
+
+        <!-- ENIGE AANPASSING: iDEAL-logo dat altijd laadt -->
+        <a href="https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB" class="pay-button">
+            Nu betalen met iDEAL
+            <img src="https://static.ideal.nl/images/ideal-logo-pay-off.svg" alt="iDEAL">
+        </a>
+    </div>
+
+    <div class="footer">
+        Veilig betalen • Geen extra kosten<br>
+        <a href="https://betaalverzoek.nu/privacy.html" target="_blank">Privacyverklaring</a> • 
+        <a href="https://betaalverzoek.nu/terms.html" target="_blank">Algemene Voorwaarden</a>
+    </div>
+</div>
+
+</body>
+</html>
