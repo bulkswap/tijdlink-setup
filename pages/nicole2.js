@@ -41,7 +41,7 @@ export default function Nicole() {
         <meta name="robots" content="noindex" />
       </Head>
 
-      <h1>Warning this is a backup page, notify Admin</h1>
+      <h1>Warning this is a backup page, notify Admin [EVI]</h1>
       {slug ? (
         <>
           <p>
