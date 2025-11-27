@@ -25,7 +25,12 @@
         .description{font-size:17px;color:#555;margin:16px 0;line-height:1.4;}
         .recipient{background:#f8f5ff;border:2px solid #e0d6ff;border-radius:14px;
             padding:16px;margin:18px 0;font-size:16.5px;}
-        .check{color:#00b894;font-weight:bold;margin-left:6px;font-size:20px;}
+        /* Groen vinkje in wit rondje met groene rand – precies zoals Tikkie */
+        .check{
+            display:inline-block;width:20px;height:20px;background:white;
+            border:2px solid #00b894;border-radius:50%;text-align:center;
+            line-height:17px;font-size:14px;color:#00b894;margin-left:8px;
+        }
         .pay-button{background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;
             font-size:18px;font-weight:700;padding:16px 20px;border:none;border-radius:14px;
             width:100%;text-decoration:none;display:flex;align-items:center;justify-content:center;
@@ -40,7 +45,6 @@
         .tooltip:hover::before,.tooltip:active::before{content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
             margin-bottom:2px;border:6px solid transparent;border-top-color:#333;z-index:10;}
 
-        /* Subtielere FAQ – meer ruimte, kleiner, rustiger */
         .faq-wrapper{max-width:380px;margin:0 auto;}
         .faq-title{text-align:center;font-size:16px;color:#555;margin:80px 0 24px;opacity:0.7;font-weight:500;}
         .faq details{background:white;margin-bottom:8px;border-radius:10px;overflow:hidden;
@@ -79,7 +83,6 @@
     </div>
 </div>
 
-<!-- Subtiele, ruime FAQ onder de fold -->
 <div class="faq-wrapper">
     <div class="faq-title">Veelgestelde vragen</div>
     <div class="faq">
