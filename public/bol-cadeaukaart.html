@@ -32,9 +32,33 @@
         .description{font-size:18px;color:#555;margin:20px 0;line-height:1.4;}
         .recipient{
             background:#f8f5ff;border:2px solid #e0d6ff;border-radius:16px;
-            padding:20px;margin:20px 0;font-size:17px;
+            padding:20px;margin:20px 0;position:relative;font-size:17px;
         }
         .check{color:#00b894;font-weight:bold;margin-left:6px;font-size:20px;}
+
+        /* === DE OORSPRONKELIJKE HOVER DIE JE GOED VOND === */
+        .tooltip{
+            position:relative;cursor:help;display:inline-block;
+        }
+        .tooltip:hover::after,.tooltip:active::after{
+            content:attr(data-text);
+            position:absolute;
+            bottom:100%;left:50%;transform:translateX(-50%);
+            margin-bottom:8px;
+            background:#333;color:#fff;padding:8px 12px;
+            border-radius:8px;font-size:14px;white-space:nowrap;
+            z-index:10;
+        }
+        .tooltip:hover::before,.tooltip:active::before{
+            content:"";
+            position:absolute;
+            bottom:100%;left:50%;transform:translateX(-50%);
+            margin-bottom:2px;
+            border:6px solid transparent;
+            border-top-color:#333;
+            z-index:10;
+        }
+
         .pay-button{
             background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;
             font-size:18px;font-weight:700;padding:18px 24px;border:none;border-radius:16px;
@@ -43,9 +67,7 @@
         }
         .pay-button:hover{transform:translateY(-3px);}
         .pay-button img{height:30px;margin-left:12px;}
-        .footer{
-            padding:20px;font-size:12.5px;color:#777;background:#f9f9ff;text-align:center;line-height:1.7;
-        }
+        .footer{padding:20px;font-size:12.5px;color:#777;background:#f9f9ff;text-align:center;line-height:1.7;}
         .footer a{color:#00b894;text-decoration:none;}
     </style>
 </head>
@@ -83,15 +105,6 @@
         <a href="https://betaalverzoek.nu/terms.html" target="_blank">Algemene Voorwaarden</a>
     </div>
 </div>
-
-<!-- Enige JavaScript: alleen voor mooie hover-teksten (werkt overal) -->
-<script>
-document.querySelectorAll('.tooltip').forEach(el => {
-    el.addEventListener('mouseenter', () => el.title = el.dataset.text);
-    el.addEventListener('mouseleave', () => el.title = '');
-    el.addEventListener('click', () => { alert(el.dataset.text); el.title = ''; });
-});
-</script>
 
 </body>
 </html>
