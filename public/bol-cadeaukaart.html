@@ -39,12 +39,6 @@
         .recipient strong{
             color:#6c5ce7;cursor:help;display:inline-block;position:relative;
         }
-        .recipient strong:hover::after{
-            content:attr(data-phone);
-            position:absolute;top:-40px;left:50%;transform:translateX(-50%);
-            background:#333;color:white;padding:8px 14px;border-radius:10px;
-            font-size:14px;white-space:nowrap;z-index:10;
-        }
         .check{color:#00b894;font-weight:bold;margin-left:6px;font-size:20px;}
         .pay-button{
             background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;
@@ -59,6 +53,17 @@
         }
         .footer a{color:#00b894;text-decoration:none;}
         .footer a:hover{text-decoration:underline;}
+
+        /* Hover-teksten (onzichtbaar tot hover) */
+        .hover-info {
+            position:relative;cursor:help;
+        }
+        .hover-info:hover::after {
+            content:attr(data-info);
+            position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+            background:#333;color:#fff;padding:8px 12px;border-radius:8px;
+            font-size:14px;white-space:nowrap;z-index:10;
+        }
     </style>
 </head>
 <body>
@@ -71,14 +76,18 @@
 
     <div class="content">
         <div class="amount">€50,00</div>
-        <div class="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
+        <div class="description">
+            Bol.com cadeaukaart via 
+            <span class="hover-info" data-info="Opwaarderen.nl levert de cadeaukaart.">Opwaarderen.nl</span>
+        </div>
 
         <div class="recipient">
             Ontvanger<br>
-            <strong data-phone="0612345678">Fleur Jongkamp <span class="check">✓</span></strong>
+            <strong class="hover-info" data-info="De cadeaukaart wordt automatisch naar de ontvanger gestuurd zodra de betaling is voltooid;">
+                Fleur Jongkamp <span class="check">Check</span>
+            </strong>
         </div>
 
-        <!-- ENIGE AANPASSING: iDEAL-logo dat altijd laadt -->
         <a href="https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB" class="pay-button">
             Nu betalen met iDEAL
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/IDEAL_%28Bezahlsystem%29_logo.svg/1200px-IDEAL_%28Bezahlsystem%29_logo.svg.png" alt="iDEAL">
