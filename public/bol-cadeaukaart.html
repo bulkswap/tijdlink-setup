@@ -37,7 +37,7 @@
             padding:20px;margin:20px 0;position:relative;font-size:17px;
         }
         .recipient strong{
-            color:#6c5ce7;cursor:help;position:relative;
+            color:#6c5ce7;cursor:help;display:inline-block;
         }
         .recipient strong:hover::after{
             content:"0612345678";
@@ -50,4 +50,28 @@
             background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;
             font-size:18px;font-weight:700;padding:18px;border:none;border-radius:16px;
             width:100%;text-decoration:none;display:block;
-            box-shadow:0 8px 20px rgba(85,239,196,0.3);transition:all
+            box-shadow:0 8px 20px rgba(85,239,196,0.3);transition:all .2s;
+        }
+        .pay-button:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(85,239,196,0.4);}
+        .footer{
+            padding:20px;font-size:12.5px;color:#777;background:#f9f9ff;text-align:center;line-height:1.7;
+        }
+        .footer a{color:#00b894;text-decoration:none;}
+        .footer a:hover{text-decoration:underline;}
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header">
+        <h1>Betaalverzoek</h1>
+        <p>Eenvoudig, snel én veilig betalen.</p>
+    </div>
+
+    <div class="content">
+        <div class="amount">€50,00</div>
+        <div class="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
+
+        <div class="recipient">
+            Ontvanger<br>
+            <strong>Fleur Jongkamp <span
