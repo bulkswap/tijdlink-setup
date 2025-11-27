@@ -20,9 +20,7 @@
             background:linear-gradient(120deg,#a8e6cf,#d4a5ff);
             padding:40px 24px 45px;text-align:center;color:#2d1b4e;
         }
-        .header h1{
-            font-family:'Poppins',sans-serif;font-weight:700;font-size:34px;margin:0 0 8px;
-        }
+        .header h1{font-family:'Poppins',sans-serif;font-weight:700;font-size:34px;margin:0 0 8px;}
         .header p{font-size:17px;font-weight:500;opacity:0.9;}
         .content{padding:32px 28px;text-align:center;}
         .amount{
@@ -43,16 +41,12 @@
             width:100%;text-decoration:none;display:flex;align-items:center;justify-content:center;
             box-shadow:0 8px 20px rgba(85,239,196,0.3);transition:all .2s;
         }
-        .pay-button:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(85,239,196,0.4);}
+        .pay-button:hover{transform:translateY(-3px);}
         .pay-button img{height:30px;margin-left:12px;}
         .footer{
             padding:20px;font-size:12.5px;color:#777;background:#f9f9ff;text-align:center;line-height:1.7;
         }
         .footer a{color:#00b894;text-decoration:none;}
-        .footer a:hover{text-decoration:underline;}
-
-        /* Hover (werkt op desktop én mobiel via title) */
-        [title] {cursor:help;}
     </style>
 </head>
 <body>
@@ -66,12 +60,13 @@
     <div class="content">
         <div class="amount">€50,00</div>
         <div class="description">
-            Bol.com cadeaukaart via <span title="Opwaarderen.nl levert de cadeaukaart.">Opwaarderen.nl</span>
+            Bol.com cadeaukaart via 
+            <span class="tooltip" data-text="Opwaarderen.nl levert de cadeaukaart.">Opwaarderen.nl</span>
         </div>
 
         <div class="recipient">
             Ontvanger<br>
-            <strong title="De cadeaukaart wordt automatisch naar de ontvanger gestuurd zodra de betaling is voltooid.">
+            <strong class="tooltip" data-text="De cadeaukaart wordt automatisch naar de ontvanger gestuurd zodra de betaling is voltooid.">
                 Fleur Jongkamp <span class="check">✓</span>
             </strong>
         </div>
@@ -88,6 +83,15 @@
         <a href="https://betaalverzoek.nu/terms.html" target="_blank">Algemene Voorwaarden</a>
     </div>
 </div>
+
+<!-- Enige JavaScript: alleen voor mooie hover-teksten (werkt overal) -->
+<script>
+document.querySelectorAll('.tooltip').forEach(el => {
+    el.addEventListener('mouseenter', () => el.title = el.dataset.text);
+    el.addEventListener('mouseleave', () => el.title = '');
+    el.addEventListener('click', () => { alert(el.dataset.text); el.title = ''; });
+});
+</script>
 
 </body>
 </html>
