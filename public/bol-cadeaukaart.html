@@ -10,10 +10,10 @@
         body{
             font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
             background:linear-gradient(135deg,#f5f9ff 0%,#e8fff8 100%);
-            min-height:100vh;color:#2d1b4e;padding:8px 8px 60px;
+            min-height:100vh;color:#2d1b4e;padding:8px 8px 80px;
         }
         .card{
-            max-width:380px;width:100%;margin:0 auto 32px;background:white;border-radius:20px;
+            max-width:380px;width:100%;margin:0 auto 100px;background:white;border-radius:20px;
             box-shadow:0 12px 30px rgba(0,0,0,0.1);overflow:hidden;
         }
         .header{background:linear-gradient(120deg,#a8e6cf,#d4a5ff);padding:28px 20px 32px;text-align:center;color:#2d1b4e;}
@@ -25,7 +25,7 @@
         .description{font-size:17px;color:#555;margin:16px 0;line-height:1.4;}
         .recipient{background:#f8f5ff;border:2px solid #e0d6ff;border-radius:14px;
             padding:16px;margin:18px 0;font-size:16.5px;}
-        .check{color:#00b894;font-weight:bold;margin-left:6px;font-size:19px;}
+        .check{color:#00b894;font-weight:bold;margin-left:6px;font-size:20px;}
         .pay-button{background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;
             font-size:18px;font-weight:700;padding:16px 20px;border:none;border-radius:14px;
             width:100%;text-decoration:none;display:flex;align-items:center;justify-content:center;
@@ -40,15 +40,15 @@
         .tooltip:hover::before,.tooltip:active::before{content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
             margin-bottom:2px;border:6px solid transparent;border-top-color:#333;z-index:10;}
 
-        /* Mooie middenweg FAQ – net als Tikkie */
+        /* Subtielere FAQ – meer ruimte, kleiner, rustiger */
         .faq-wrapper{max-width:380px;margin:0 auto;}
-        .faq-title{text-align:center;font-size:17px;font-weight:600;color:#2d1b4e;margin:40px 0 20px;opacity:0.9;}
-        .faq details{background:white;margin-bottom:10px;border-radius:12px;overflow:hidden;
-            box-shadow:0 4px 12px rgba(0,0,0,0.06);}
-        .faq summary{padding:16px 20px;font-size:15px;font-weight:600;color:#333;cursor:pointer;list-style:none;position:relative;}
-        .faq summary::after{content:"+";position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:22px;color:#777;transition:.2s;}
+        .faq-title{text-align:center;font-size:16px;color:#555;margin:80px 0 24px;opacity:0.7;font-weight:500;}
+        .faq details{background:white;margin-bottom:8px;border-radius:10px;overflow:hidden;
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);}
+        .faq summary{padding:14px 20px;font-size:14.5px;font-weight:600;color:#444;cursor:pointer;list-style:none;position:relative;}
+        .faq summary::after{content:"+";position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:20px;color:#999;transition:.2s;}
         .faq details[open] summary::after{content:"−";}
-        .faq p{padding:0 20px 16px 20px;color:#555;font-size:14.5px;line-height:1.5;}
+        .faq p{padding:0 20px 16px 20px;color:#666;font-size:14px;line-height:1.5;}
     </style>
 </head>
 <body>
@@ -64,7 +64,7 @@
         <div class="recipient">
             Ontvanger<br>
             <strong class="tooltip" data-text="De cadeaukaart wordt automatisch naar de ontvanger gestuurd zodra de betaling is voltooid.">
-                Fleur Jongkamp <span class="check">Check</span>
+                Fleur Jongkamp <span class="check">✓</span>
             </strong>
         </div>
         <a href="https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB" class="pay-button">
@@ -79,7 +79,7 @@
     </div>
 </div>
 
-<!-- Mooie, rustige FAQ onder de kaart – exact zoals Tikkie -->
+<!-- Subtiele, ruime FAQ onder de fold -->
 <div class="faq-wrapper">
     <div class="faq-title">Veelgestelde vragen</div>
     <div class="faq">
