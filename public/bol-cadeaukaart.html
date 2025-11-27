@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Betaalverzoek</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <title>Betaalverzoek – Bol.com cadeaukaart</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{
@@ -18,12 +18,12 @@
         }
         .header{
             background:linear-gradient(120deg,#a8e6cf,#d4a5ff);
-            padding:40px 24px 45px;text-align:center;color:white;
+            padding:40px 24px 45px;text-align:center;color:#2d1b4e;
         }
         .header h1{
-            font-family:'Fredoka One',cursive;font-size:36px;margin:0 0 8px;letter-spacing:1px;
+            font-family:'Poppins',sans-serif;font-weight:700;font-size:34px;margin:0 0 8px;letter-spacing:0.5px;
         }
-        .header p{font-size:17px;font-weight:500;}
+        .header p{font-size:17px;font-weight:500;color:#2d1b4e;color:rgba(45,27,78,0.9);}
         .content{padding:32px 28px;text-align:center;}
         .amount{
             font-size:56px;font-weight:800;
@@ -45,67 +45,11 @@
             background:#333;color:white;padding:8px 14px;border-radius:10px;
             font-size:14px;white-space:nowrap;z-index:10;
         }
-        .check{color:#00b894;margin-left:6px;font-weight:bold;}
+        .check{color:#00b894;font-weight:bold;margin-left:6px;font-size:20px;}
         .pay-button{
             background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;
-            font-size:18px;font-weight:700;padding:18px;border:none;border-radius:16px;
-            width:100%;text-decoration:none;display:block;
-            box-shadow:0 8px 20px rgba(85,239,196,0.3);transition:all .2s;
+            font-size:18px;font-weight:700;padding:18px 18px 18px 24px;border:none;border-radius:16px;
+            width:100%;text-decoration:none;display:flex;align-items:center;justify-content:center;
+            box-shadow:0 8px 20px rgba(85,239,196,0.3);transition:all .2s;position:relative;
         }
-        .pay-button:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(85,239,196,0.4);}
-        .footer{
-            padding:20px;font-size:12.5px;color:#777;background:#f9f9ff;text-align:center;line-height:1.7;
-        }
-        .footer a{color:#00b894;text-decoration:none;}
-        .footer a:hover{text-decoration:underline;}
-    </style>
-</head>
-<body>
-
-<div class="card">
-    <div class="header">
-        <h1>Betaalverzoek</h1>
-        <p>Eenvoudig, snel én veilig betalen.</p>
-    </div>
-
-    <div class="content">
-        <div class="amount" id="amount">€50,00</div>
-        <div class="description" id="description">Bol.com cadeaukaart via Opwaarderen.nl</div>
-
-        <div class="recipient">
-            Ontvanger<br>
-            <strong id="receiver" data-phone="0612345678">Fleur Jongkamp <span class="check">Check</span></strong>
-        </div>
-
-        <a href="https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB" 
-           class="pay-button" id="payBtn">
-            Nu betalen met iDEAL
-        </a>
-    </div>
-
-    <div class="footer">
-        Veilig betalen • Geen extra kosten<br>
-        <a href="https://betaalverzoek.nu/privacy.html" target="_blank">Privacyverklaring</a> • 
-        <a href="https://betaalverzoek.nu/terms.html" target="_blank">Algemene Voorwaarden</a>
-    </div>
-</div>
-
-<script>
-    const urlParams = new URLSearchParams(window.location.search);
-
-    const price = urlParams.get('price') || '50';
-    const article = urlParams.get('article') || 'Bol.com cadeaukaart';
-    const via = urlParams.get('via') || 'Opwaarderen.nl';
-    const receiver = urlParams.get('receiver') || 'Fleur Jongkamp';
-    const phone = urlParams.get('phone') || '0612345678';
-    const checkout = urlParams.get('checkout') || 'https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB';
-
-    document.getElementById('amount').textContent = '€' + parseFloat(price).toFixed(2).replace('.', ',');
-    document.getElementById('description').textContent = article + ' via ' + via;
-    document.getElementById('receiver').textContent = receiver + ' Check';
-    document.getElementById('receiver').setAttribute('data-phone', phone);
-    document.getElementById('payBtn').href = checkout;
-</script>
-
-</body>
-</html>
+        .pay
