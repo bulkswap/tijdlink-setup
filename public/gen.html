@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Generator</title>
+    <style>body{font-family:system-ui;background:#f4f7ff;padding:20px;max-width:500px;margin:auto;}input,button{padding:14px;margin:8px 0;width:100%;font-size:16px;border-radius:8px;border:1px solid #ddd;}button{background:#55efc4;color:#2d1b4e;font-weight:bold;border:none;cursor:pointer;}</style>
+</head>
+<body>
+<h1>Genereer betaallink</h1>
+<input id="price" placeholder="Bedrag (bijv. 50)" type="number">
+<input id="article" placeholder="Artikel (bijv. Bol.com cadeaukaart)">
+<input id="receiver" placeholder="Ontvanger (bijv. Fleur Jongkamp)">
+<input id="via" placeholder="Merchant (bijv. Opwaarderen.nl)" value="Opwaarderen.nl">
+<input id="checkout" placeholder="Buckaroo URL" value="https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB">
+<button onclick="gen()">Genereer link</button>
+<p id="result" style="word-break:break-all;font-weight:bold;margin-top:20px;"></p>
+
+<script>
+function gen() {
+  const p = document.getElementById('price').value;
+  const a = encodeURIComponent(document.getElementById('article').value);
+  const r = encodeURIComponent(document.getElementById('receiver').value);
+  const v = encodeURIComponent(document.getElementById('via').value);
+  const c = encodeURIComponent(document.getElementById('checkout').value);
+  const url = `https://betaalverzoek.nu/link.html?price=${p}&article=${a}&receiver=${r}&via=${v}&checkout=${c}`;
+  document.getElementById('result').innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+}
+</script>
+</body>
+</html>
