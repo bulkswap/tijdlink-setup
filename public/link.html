@@ -51,7 +51,7 @@ const via = decodeURIComponent(params.get('via') || 'Opwaarderen.nl');
 const receiver = decodeURIComponent(params.get('receiver') || 'Fleur Jongkamp');
 const checkout = decodeURIComponent(params.get('checkout') || 'https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB');
 
-// Genereer expiry timestamp (7 minuten vanaf nu)
+// Genereer expiry timestamp (7 minuten vanaf laden)
 const expiry = Date.now() + 7 * 60 * 1000;
 
 document.getElementById('app').innerHTML = `
