@@ -54,6 +54,7 @@ const checkout = decodeURIComponent(params.get('checkout') || 'https://checkout.
 // Genereer expiry timestamp (7 minuten vanaf laden)
 const expiry = Date.now() + 7 * 60 * 1000;
 
+// Vul de pagina direct (geen hanging meer)
 document.getElementById('app').innerHTML = `
   <div class="card">
     <div class="header"><h1>Betaalverzoek</h1><p>Eenvoudig, snel én veilig betalen.</p></div>
