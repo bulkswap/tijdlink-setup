@@ -1,103 +1,51 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Betaalverzoek</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#f5f9ff 0%,#e8fff8 100%);min-height:100vh;color:#2d1b4e;padding:8px 8px 80px;display:flex;align-items:center;justify-content:center;}
-        .card{max-width:380px;width:100%;background:white;border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,0.1);overflow:hidden;}
-        .header{background:linear-gradient(120deg,#a8e6cf,#d4a5ff);padding:28px 20px 32px;text-align:center;color:#2d1b4e;}
-        .header h1{font-family:'Poppins',sans-serif;font-weight:700;font-size:30px;margin:0 0 6px;}
-        .header p{font-size:15.5px;font-weight:500;opacity:0.9;}
-        .content{padding:24px 20px;text-align:center;}
-        .amount{font-size:48px;font-weight:800;background:linear-gradient(90deg,#55efc4,#a29bfe);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:8px 0;}
-        .description{font-size:17px;color:#555;margin:16px 0;line-height:1.4;}
-        .recipient{background:#f8f5ff;border:2px solid #e0d6ff;border-radius:14px;padding:16px;margin:18px 0;font-size:16.5px;}
-        .check{display:inline-block;width:21px;height:21px;background:#00b894;border-radius:50%;text-align:center;line-height:21px;font-size:14px;color:white;font-weight:bold;margin-left:8px;}
-        .pay-button{background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;font-size:18px;font-weight:700;padding:16px 20px;border:none;border-radius:14px;width:100%;text-decoration:none;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(85,239,196,0.3);transition:all .2s;margin-top:8px;}
-        .pay-button:hover{transform:translateY(-2px);}
-        .pay-button img{height:28px;margin-left:12px;}
-        .footer{padding:16px;font-size:12px;color:#777;background:#f9f9ff;text-align:center;line-height:1.6;}
-        .footer a{color:#00b894;text-decoration:none;}
-        .tooltip{position:relative;cursor:help;display:inline-block;}
-        .tooltip:hover::after,.tooltip:active::after{content:attr(data-text);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:8px;background:#333;color:#fff;padding:7px 11px;border-radius:8px;font-size:13.5px;white-space:nowrap;z-index:10;}
-        .tooltip:hover::before,.tooltip:active::before{content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;border:6px solid transparent;border-top-color:#333;z-index:10;}
-        .faq-wrapper{max-width:380px;margin:80px auto 0;}
-        .faq-title{text-align:center;font-size:16px;color:#555;margin-bottom:24px;opacity:0.7;font-weight:500;}
-        .faq details{background:white;margin-bottom:8px;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);}
-        .faq summary{padding:14px 20px;font-size:14.5px;font-weight:600;color:#444;cursor:pointer;list-style:none;position:relative;}
-        .faq summary::after{content:"+";position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:20px;color:#999;transition:.2s;}
-        .faq details[open] summary::after{content:"−";}
-        .faq p{padding:0 20px 16px 20px;color:#666;font-size:14px;line-height:1.5;}
-        .expired{background:white;border-radius:20px;padding:50px 20px;text-align:center;box-shadow:0 12px 30px rgba(0,0,0,0.1);max-width:380px;width:100%;margin:20px auto;}
-        .expired h2{color:#e74c3c;margin-bottom:16px;}
-        .expired p{color:#555;font-size:16px;}
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Betaalverzoek</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;background:linear-gradient(135deg,#f5f9ff,#e8fff8);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui;padding:20px;}
+    .c{max-width:380px;width:100%;background:#fff;border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.1);overflow:hidden;text-align:center;}
+    .h{background:linear-gradient(120deg,#a8e6cf,#d4a5ff);padding:32px 20px;color:#2d1b4e;}
+    .h h1{font:700 30px 'Poppins',sans-serif;margin:0 0 6px;}
+    .a{font:800 48px system-ui;background:linear-gradient(90deg,#55efc4,#a29bfe);-webkit-background-clip:text;color:transparent;}
+    .k{width:21px;height:21px;background:#00b894;border-radius:50%;color:#fff;display:inline-block;font:bold 14px/21px Arial;margin-left:8px;}
+    .b{background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;font:700 18px system-ui;padding:16px;border:none;border-radius:14px;width:90%;text-decoration:none;display:flex;align-items:center;justify-content:center;margin:20px auto;box-shadow:0 8px 20px rgba(85,239,196,.3);}
+    .b img{height:28px;margin-left:12px;}
+    .e{background:#fff;border-radius:20px;padding:60px 20px;box-shadow:0 12px 30px rgba(0,0,0,.1);max-width:380px;margin:auto;text-align:center;}
+    .e h2{color:#e74c3c;}
+  </style>
 </head>
 <body>
+  <div id="app">Laden...</div>
 
-<div id="app">
-    <div style="text-align:center;padding:80px;font-size:18px;color:#555;">Laden...</div>
-</div>
-
-<script>
-const params = new URLSearchParams(location.search);
-const price = params.get('price') || '50';
-const article = decodeURIComponent(params.get('article') || 'Bol.com cadeaukaart');
-const via = decodeURIComponent(params.get('via') || 'Opwaarderen.nl');
-const receiver = decodeURIComponent(params.get('receiver') || 'Fleur Jongkamp');
-const checkout = decodeURIComponent(params.get('checkout') || 'https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB');
-
-// Expiry timer (7 minuten vanaf laden)
-const expiry = Date.now() + 7 * 60 * 1000;
-
-// Vul pagina direct (geen hanging)
-const app = document.getElementById('app');
-app.innerHTML = `
-  <div class="card">
-    <div class="header"><h1>Betaalverzoek</h1><p>Eenvoudig, snel én veilig betalen.</p></div>
-    <div class="content">
-      <div class="amount">€${price},00</div>
-      <div class="description">
-        ${article} via <span class="tooltip" data-text="${via} levert de cadeaukaart."> ${via}</span>
-      </div>
-      <div class="recipient">
-        Ontvanger<br>
-        <strong class="tooltip" data-text="De cadeaukaart wordt automatisch naar de ontvanger gestuurd zodra de betaling is voltooid.">
-          ${receiver} <span class="check">✓</span>
-        </strong>
-      </div>
-      <a href="${checkout}" class="pay-button" onclick="this.innerHTML='Doorsturen...';">
-        Nu betalen met iDEAL
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/IDEAL_%28Bezahlsystem%29_logo.svg/1200px-IDEAL_%28Bezahlsystem%29_logo.svg.png" alt="iDEAL">
-      </a>
-    </div>
-    <div class="footer">
-      Veilig betalen • Geen extra kosten<br>
-      <a href="https://betaalverzoek.nu/privacy.html">Privacyverklaring</a> • 
-      <a href="https://betaalverzoek.nu/terms.html">Algemene Voorwaarden</a>
-    </div>
-  </div>
-
-  <div class="faq-wrapper">
-    <div class="faq-title">Veelgestelde vragen</div>
-    <div class="faq">
-      <details><summary>Hoe werkt de betaling?</summary><p>Je betaalt via iDEAL. De betaling wordt veilig verwerkt door een betaalprovider.</p></details>
-      <details><summary>Waarom staat de ontvanger op deze pagina?</summary><p>Je koopt een cadeaukaart die direct naar de ontvanger wordt gestuurd.</p></details>
-      <details><summary>Ontvangt de ontvanger mijn gegevens?</summary><p>Nee, de ontvanger ziet alleen dat je hebt betaald.</p></details>
-      <details><summary>Wanneer ontvangt de ontvanger het product?</summary><p>Direct na afronding van de betaling.</p></details>
-    </div>
-  </div>
-`;
-
-// 7 minuten expiry (vanaf laden)
-setTimeout(() => {
-  document.body.innerHTML = `<div class="expired"><h2>Deze betaallink is verlopen</h2><p>De link werkt slechts 7 minuten vanaf het moment dat je hem opent.</p></div>`;
-}, 7 * 60 * 1000);
-</script>
-
+  <script>
+    const slug = location.pathname.split('/link/')[1];
+    if (!slug) { document.getElementById('app').innerHTML = '<div class="e"><h2>Ongeldige link</h2></div>'; }
+    else {
+      fetch(`https://betaalverzoek-nu.vercel.app/api/open?id=${slug}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.expired) throw new Error("expired");
+          document.getElementById('app').innerHTML = `
+            <div class="c">
+              <div class="h"><h1>Betaalverzoek</h1><p>Snel en veilig betalen</p></div>
+              <div style="padding:24px 20px">
+                <div class="a">€${parseFloat(d.price).toFixed(2).replace('.',',')}</div>
+                <div style="margin:16px 0;color:#555;font-size:17px">${d.article} via <strong>${d.via}</strong></div>
+                <div style="background:#f8f5ff;border:2px solid #e0d6ff;border-radius:14px;padding:16px;margin:20px 0">
+                  Ontvanger<br><strong>${d.receiver} <span class="k">✓</span></strong>
+                </div>
+                <a href="${d.checkout}" class="b">Nu betalen met iDEAL <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/IDEAL_%28Bezahlsystem%29_logo.svg/1200px-IDEAL_%28Bezahlsystem%29_logo.svg.png"></a>
+              </div>
+            </div>`;
+        })
+        .catch(() => {
+          document.getElementById('app').innerHTML = `<div class="e"><h2>Deze betaallink is verlopen</h2><p>Hij werkte slechts 7 minuten na de eerste opening.</p></div>`;
+        });
+    }
+  </script>
 </body>
 </html>
