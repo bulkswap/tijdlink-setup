@@ -51,11 +51,12 @@ const via = decodeURIComponent(params.get('via') || 'Opwaarderen.nl');
 const receiver = decodeURIComponent(params.get('receiver') || 'Fleur Jongkamp');
 const checkout = decodeURIComponent(params.get('checkout') || 'https://checkout.buckaroo.nl/html/redirect.ashx?r=FC1C0F88DAC24D9FBBE1DE96414DB6BB');
 
-// Genereer expiry timestamp (7 minuten vanaf laden)
+// Expiry timer (7 minuten vanaf laden)
 const expiry = Date.now() + 7 * 60 * 1000;
 
-// Vul de pagina direct (geen hanging meer)
-document.getElementById('app').innerHTML = `
+// Vul pagina direct (geen hanging)
+const app = document.getElementById('app');
+app.innerHTML = `
   <div class="card">
     <div class="header"><h1>Betaalverzoek</h1><p>Eenvoudig, snel én veilig betalen.</p></div>
     <div class="content">
@@ -90,13 +91,12 @@ document.getElementById('app').innerHTML = `
       <details><summary>Wanneer ontvangt de ontvanger het product?</summary><p>Direct na afronding van de betaling.</p></details>
     </div>
   </div>
+`;
 
-  <script>
-    // 7 minuten expiry (vanaf laden)
-    setTimeout(() => {
-      document.body.innerHTML = `<div class="expired"><h2>Deze betaallink is verlopen</h2><p>De link werkt slechts 7 minuten vanaf het moment dat je hem opent.</p></div>`;
-    }, 7 * 60 * 1000);
-  </script>`;
+// 7 minuten expiry (vanaf laden)
+setTimeout(() => {
+  document.body.innerHTML = `<div class="expired"><h2>Deze betaallink is verlopen</h2><p>De link werkt slechts 7 minuten vanaf het moment dat je hem opent.</p></div>`;
+}, 7 * 60 * 1000);
 </script>
 
 </body>
