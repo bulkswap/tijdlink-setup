@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Betaalverzoek</title>
+  <style>
+    body{margin:0;background:linear-gradient(135deg,#f5f9ff,#e8fff8);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui;color:#2d1b4e;padding:20px;}
+    .c{max-width:380px;width:100%;background:#fff;border-radius:20px;box-shadow:0 12px 30px rgba(0,0,0,.1);overflow:hidden;text-align:center;}
+    .h{background:linear-gradient(120deg,#a8e6cf,#d4a5ff);padding:32px 20px;}
+    .h h1{font:700 30px 'Poppins',sans-serif;margin:0 0 6px;}
+    .a{font:800 48px system-ui;background:linear-gradient(90deg,#55efc4,#a29bfe);-webkit-background-clip:text;color:transparent;}
+    .r{background:#f8f5ff;border:2px solid #e0d6ff;border-radius:14px;padding:16px;margin:20px 0;font-size:16.5px;}
+    .k{width:21px;height:21px;background:#00b894;border-radius:50%;color:#fff;display:inline-block;font:bold 14px/21px Arial;margin-left:8px;}
+    .b{background:linear-gradient(90deg,#55efc4,#81ecec);color:#2d1b4e;font:700 18px system-ui;padding:16px;border:none;border-radius:14px;width:90%;text-decoration:none;display:flex;align-items:center;justify-content:center;margin:10px auto;}
+    .b img{height:28px;margin-left:12px;}
+    .f{padding:16px;font-size:12px;color:#777;background:#f9f9ff;}
+    .e{background:#fff;border-radius:20px;padding:60px 20px;box-shadow:0 12px 30px rgba(0,0,0,.1);max-width:380px;margin:auto;}
+    .e h2{color:#e74c3c;}
+  </style>
+</head>
+<body>
+
+<div id="app">Laden...</div>
+
+<script>
+// Haal slug uit de URL (werkt op /link/abc123-def456)
+const slug = location.pathname.split('/link/')[1] || new URLSearchParams(location.search).get('slug');
+if (!slug) {
+  document.getElementById('app').innerHTML = `<div class="e"><h2>Link niet gevonden</h2></div>`;
+} else {
+  fetch(`https://cadeaukaart-setup-5krf68fu8-kays-projects-c29956c3.vercel.app/api/open?id=${slug}`)
+    .then(r => r.json())
+    .then(d => {
+      if (!d || Date.now() > d.expires) {
+        document.getElementById('app').innerHTML = `<div class="e"><h2>Verlopen</h2><p>Deze link werkt slechts 7 minuten vanaf aanmaken.</p></div>`;
+        return;
+      }
+      document.getElementById('app').innerHTML = `
+        <div class="c">
+          <div class="h"><h1>Betaalverzoek</h1><p>Eenvoudig, snel én veilig betalen.</p></div>
+          <div style="padding:24px 20px">
+            <div class="a">€${parseFloat(d.price).toFixed(2).replace('.',',')}</div>
+            <div style="margin:16px 0;color:#555">${d
