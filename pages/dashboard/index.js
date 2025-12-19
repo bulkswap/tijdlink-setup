@@ -26,6 +26,8 @@ export default function Dashboard({ logs }) {
           <tr>
             <th>Tijd</th>
             <th>Slug</th>
+            <th>Flow</th>
+            <th>Event</th>
             <th>Pay link</th>
             <th>IP</th>
             <th>Locatie</th>
@@ -52,6 +54,11 @@ export default function Dashboard({ logs }) {
                   /pay/{log.slug}
                 </a>
               </td>
+                  
+              <td>{log.flow}</td>
+                  
+              <td>{log.event}</td>
+
 
               <td>{log.ip}</td>
 
