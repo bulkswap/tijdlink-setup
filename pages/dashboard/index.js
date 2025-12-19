@@ -1,45 +1,65 @@
 import redis from '../../lib/redis';
 
 export async function getServerSideProps() {
-  const raw = await redis.lrange('all-slugs', 0, 200);
-  const uniqueSlugs = [...new Set(raw || [])];
+  const keys = await redis.keys('log-*');
+  const logs = [];
 
-  const slugs = [];
-
-  for (const slug of uniqueSlugs) {
-    const data = await redis.get(`slug-${slug}`);
-    if (data) {
-      slugs.push({
-        slug,
-        ...data,
-      });
-    }
+  for (const key of keys || []) {
+    const data = await redis.get(key);
+    if (data) logs.push(data);
   }
 
-  return { props: { slugs } };
+  // nieuwste bovenaan
+  logs.sort((a, b) => b.time - a.time);
+
+  return { props: { logs } };
 }
 
-export default function Dashboard({ slugs }) {
+export default function Dashboard({ logs }) {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Dashboard</h1>
+      <h1>Dashboard – Kliklog</h1>
 
-      {slugs.length === 0 && <p>Nog geen links.</p>}
+      {logs.length === 0 && <p>Nog geen kliks.</p>}
 
-      {slugs.map((s) => (
-        <div key={s.slug} style={{ marginBottom: '1rem' }}>
-          <a href={`/dashboard/${s.slug}`}>
-            <strong>{s.slug}</strong>
-          </a>
-          <div>Flow: {s.flow}</div>
-          <div>
-            Eerste klik:{' '}
-            {s.firstClick
-              ? new Date(s.firstClick).toLocaleString()
-              : 'nog niet'}
-          </div>
-        </div>
-      ))}
+      <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th>Tijd</th>
+            <th>Slug</th>
+            <th>IP</th>
+            <th>Locatie</th>
+            <th>User Agent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map((log, i) => (
+            <tr key={i}>
+              <td>{new Date(log.time).toLocaleString()}</td>
+              <td>
+                <a href={`/dashboard/${log.slug}`} target="_blank">
+                  {log.slug}
+                </a>
+              </td>
+              <td>{log.ip}</td>
+              <td>
+                {log.lat && log.lng ? (
+                  <a
+                    href={`https://www.google.com/maps?q=${log.lat},${log.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    📍 Bekijk op kaart
+                  </a>
+                ) : '—'}
+              </td>
+              <td title={log.userAgent}>
+                {log.userAgent?.slice(0, 40)}…
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
