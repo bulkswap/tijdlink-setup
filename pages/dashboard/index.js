@@ -1,26 +1,17 @@
+import redis from '../../lib/redis';
+
 export async function getServerSideProps() {
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  const listRes = await fetch(`${redisUrl}/lrange/all-slugs/0/200`, {
-    headers: { Authorization: `Bearer ${redisToken}` },
-  });
-
-  const raw = (await listRes.json()).result || [];
-  const uniqueSlugs = [...new Set(raw)];
+  const raw = await redis.lrange('all-slugs', 0, 200);
+  const uniqueSlugs = [...new Set(raw || [])];
 
   const slugs = [];
 
   for (const slug of uniqueSlugs) {
-    const res = await fetch(`${redisUrl}/get/slug-${slug}`, {
-      headers: { Authorization: `Bearer ${redisToken}` },
-    });
-
-    const data = await res.json();
-    if (data?.result) {
+    const data = await redis.get(`slug-${slug}`);
+    if (data) {
       slugs.push({
         slug,
-        ...JSON.parse(data.result),
+        ...data,
       });
     }
   }
