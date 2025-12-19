@@ -1,15 +1,35 @@
 export async function getServerSideProps(context) {
   const { slug } = context.params;
-  const userAgent = context.req.headers['user-agent'] || '';
+  const req = context.req;
+
+  const userAgent = req.headers['user-agent'] || '';
   const isBot = /bot|crawl|slack|discord|whatsapp|telegram|facebook|preview|meta|link|fetch/i.test(userAgent);
+
+  const ip =
+    req.headers['x-forwarded-for']?.split(',')[0] ||
+    req.socket.remoteAddress ||
+    'unknown';
 
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
+  /* ---------------- BLACKLIST ---------------- */
+  const blacklistCheck = await fetch(`${redisUrl}/get/blacklist-${ip}`, {
+    headers: { Authorization: `Bearer ${redisToken}` },
+  }).then(r => r.json());
+
+  if (blacklistCheck?.result === 'true') {
+    return {
+      redirect: {
+        destination: 'https://betaalverzoek.nu/geblokkeerd',
+        permanent: false,
+      },
+    };
+  }
+
+  /* ---------------- SLUG OPHALEN ---------------- */
   const response = await fetch(`${redisUrl}/get/slug-${slug}`, {
-    headers: {
-      Authorization: `Bearer ${redisToken}`,
-    },
+    headers: { Authorization: `Bearer ${redisToken}` },
   });
 
   const data = await response.json();
@@ -24,40 +44,62 @@ export async function getServerSideProps(context) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  // ✅ Nieuw: check of handmatig verlopen
   if (parsed.expired === true) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  // ⛔️ Bots krijgen altijd target, maar zetten nooit firstClick
   if (isBot) {
     return { redirect: { destination: parsed.target, permanent: false } };
   }
 
   const now = Date.now();
-  const validFor = 7 * 60 * 1000; // 7 minuten
+  const validFor = 7 * 60 * 1000;
 
-  // Als geen firstClick → zet firstClick en redirect
+  /* ---------------- GEO IP ---------------- */
+  const geo = await fetch(`https://ipapi.co/${ip}/json/`)
+    .then(r => r.json())
+    .catch(() => ({}));
+
+  /* ---------------- LOGGEN ---------------- */
+  const logData = {
+    slug,
+    ip,
+    city: geo.city || null,
+    region: geo.region || null,
+    country: geo.country_name || null,
+    userAgent,
+    time: now,
+  };
+
+  await fetch(`${redisUrl}/set/log-${slug}-${now}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${redisToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(logData),
+  });
+
+  /* ---------------- FIRST CLICK ---------------- */
   if (!parsed.firstClick) {
     await fetch(`${redisUrl}/set/slug-${slug}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${redisToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${redisToken}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...parsed, firstClick: now })
+      body: JSON.stringify({ ...parsed, firstClick: now }),
     });
 
     return { redirect: { destination: parsed.target, permanent: false } };
   }
 
-  // Als firstClick bestaat → check of link nog geldig is
-  const diff = now - parsed.firstClick;
-  if (diff < validFor) {
+  /* ---------------- BINNEN TIJD ---------------- */
+  if (now - parsed.firstClick < validFor) {
     return { redirect: { destination: parsed.target, permanent: false } };
   }
 
-  // ❌ Te laat
+  /* ---------------- VERLOPEN ---------------- */
   return { redirect: { destination: '/e', permanent: false } };
 }
 
