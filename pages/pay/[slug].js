@@ -5,6 +5,7 @@ export async function getServerSideProps(context) {
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
+  // 🔹 Slug ophalen
   const res = await fetch(`${redisUrl}/get/slug-${slug}`, {
     headers: { Authorization: `Bearer ${redisToken}` },
   });
@@ -17,16 +18,17 @@ export async function getServerSideProps(context) {
   const now = Date.now();
   const validFor = 7 * 60 * 1000;
 
-  // ⛔ Expiry alleen voor normal & verify
-  if (
-    parsed.flow !== 'verify-blocked' &&
-    parsed.firstClick &&
-    now - parsed.firstClick >= validFor
-  ) {
-    return { redirect: { destination: '/e', permanent: false } };
-  }
+  // ✅ NIEUW: slug ALTIJD toevoegen aan dashboard index
+  await fetch(`${redisUrl}/lpush/all-slugs`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${redisToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(slug),
+  });
 
-  // 🔐 VERIFY nodig? (ALLEEN als verified ontbreekt)
+  // 🔐 verify flow
   if (
     (parsed.flow === 'verify' || parsed.flow === 'verify-blocked') &&
     !verified
@@ -39,7 +41,16 @@ export async function getServerSideProps(context) {
     };
   }
 
-  // ⏱️ Timer starten (niet voor verify-blocked)
+  // ⏱️ expiry (NIET voor verify-blocked)
+  if (
+    parsed.flow !== 'verify-blocked' &&
+    parsed.firstClick &&
+    now - parsed.firstClick >= validFor
+  ) {
+    return { redirect: { destination: '/e', permanent: false } };
+  }
+
+  // ⏱️ timer starten
   if (!parsed.firstClick && parsed.flow !== 'verify-blocked') {
     await fetch(`${redisUrl}/set/slug-${slug}`, {
       method: 'POST',
@@ -61,7 +72,6 @@ export async function getServerSideProps(context) {
     };
   }
 
-  // ✅ normal / verify
   return {
     redirect: {
       destination: parsed.target,
