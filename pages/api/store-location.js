@@ -1,10 +1,9 @@
 export default async function handler(req, res) {
-  const { slug, lat, lng, accuracy } = req.body;
+  const { slug, lat, lng, accuracy, denied } = req.body;
 
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  // ✅ IP bepalen (Vercel-compatibel)
   const ip =
     req.headers['x-forwarded-for']?.split(',')[0] ||
     req.socket?.remoteAddress ||
@@ -21,10 +20,11 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       slug,
       ip,
-      lat,
-      lng,
-      accuracy,
       userAgent,
+      lat: lat || null,
+      lng: lng || null,
+      accuracy: accuracy || null,
+      locationStatus: denied ? 'denied' : 'allowed',
       time: Date.now(),
     }),
   });
