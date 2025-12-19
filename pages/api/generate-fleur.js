@@ -1,4 +1,3 @@
-// pages/api/generate.js
 import { nanoid } from 'nanoid';
 import { Redis } from '@upstash/redis';
 
@@ -19,5 +18,6 @@ export default async function handler(req, res) {
     firstClick: null,
   });
 
-  res.status(200).json({ slug });
+  // ✅ BELANGRIJK
+  res.status(200).json({ slug: `pay/${slug}` });
 }
