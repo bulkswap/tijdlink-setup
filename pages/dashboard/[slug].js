@@ -1,22 +1,14 @@
+import redis from '../../lib/redis';
+
 export async function getServerSideProps({ params }) {
   const { slug } = params;
 
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  const listRes = await fetch(`${redisUrl}/keys/log-${slug}-*`, {
-    headers: { Authorization: `Bearer ${redisToken}` },
-  });
-
-  const keys = (await listRes.json()).result || [];
+  const keys = await redis.keys(`log-${slug}-*`);
   const logs = [];
 
-  for (const key of keys) {
-    const res = await fetch(`${redisUrl}/get/${key}`, {
-      headers: { Authorization: `Bearer ${redisToken}` },
-    });
-    const val = await res.json();
-    if (val?.result) logs.push(JSON.parse(val.result));
+  for (const key of keys || []) {
+    const data = await redis.get(key);
+    if (data) logs.push(data);
   }
 
   logs.sort((a, b) => b.time - a.time);
