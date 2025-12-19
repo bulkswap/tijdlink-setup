@@ -5,10 +5,14 @@ export async function getServerSideProps(context) {
   const userAgent = req.headers['user-agent'] || '';
   const isBot = /bot|crawl|slack|discord|whatsapp|telegram|facebook|preview|meta|link|fetch/i.test(userAgent);
 
-  const ip =
-    req.headers['x-forwarded-for']?.split(',')[0] ||
+  // 🔹 IP correct bepalen
+  let ip =
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
     req.socket.remoteAddress ||
     'unknown';
+
+  // IPv6 localhost normaliseren
+  if (ip === '::1') ip = 'unknown';
 
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -16,7 +20,7 @@ export async function getServerSideProps(context) {
   /* ---------------- BLACKLIST ---------------- */
   const blacklistCheck = await fetch(`${redisUrl}/get/blacklist-${ip}`, {
     headers: { Authorization: `Bearer ${redisToken}` },
-  }).then(r => r.json());
+  }).then(r => r.json()).catch(() => null);
 
   if (blacklistCheck?.result === 'true') {
     return {
@@ -48,6 +52,7 @@ export async function getServerSideProps(context) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
+  // 🤖 Bots nooit loggen / timer starten
   if (isBot) {
     return { redirect: { destination: parsed.target, permanent: false } };
   }
@@ -55,18 +60,26 @@ export async function getServerSideProps(context) {
   const now = Date.now();
   const validFor = 7 * 60 * 1000;
 
-  /* ---------------- GEO IP ---------------- */
-  const geo = await fetch(`https://ipapi.co/${ip}/json/`)
-    .then(r => r.json())
-    .catch(() => ({}));
+  /* ---------------- GEO IP (alleen als zinvol) ---------------- */
+  let geo = {};
+  if (
+    ip !== 'unknown' &&
+    !ip.startsWith('127.') &&
+    !ip.startsWith('10.') &&
+    !ip.startsWith('192.168.')
+  ) {
+    geo = await fetch(`https://ipapi.co/${ip}/json/`)
+      .then(r => r.json())
+      .catch(() => ({}));
+  }
 
   /* ---------------- LOGGEN ---------------- */
   const logData = {
     slug,
     ip,
-    city: geo.city || null,
-    region: geo.region || null,
     country: geo.country_name || null,
+    region: geo.region || null,
+    city: geo.city || null,
     userAgent,
     time: now,
   };
