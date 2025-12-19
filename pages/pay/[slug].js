@@ -1,6 +1,6 @@
 import redis from '../../lib/redis';
 
-export async function getServerSideProps({ params, query }) {
+export async function getServerSideProps({ params, query, req }) {
   const { slug } = params;
   const { verified } = query;
 
@@ -12,7 +12,25 @@ export async function getServerSideProps({ params, query }) {
   const now = Date.now();
   const validFor = 7 * 60 * 1000;
 
-  // ⏱️ expiry (NIET voor verify-blocked)
+  // IP + UA
+  const ip =
+    req.headers['x-forwarded-for']?.split(',')[0] ||
+    req.socket?.remoteAddress ||
+    'unknown';
+
+  const userAgent = req.headers['user-agent'] || 'unknown';
+
+  // ✅ ALTIJD loggen dat iemand op PAY is geweest
+  await redis.set(`log-${slug}-${now}`, {
+    slug,
+    ip,
+    userAgent,
+    flow: parsed.flow || 'normal',
+    event: 'visit',
+    time: now,
+  });
+
+  // ⏱️ expiry (niet voor verify-blocked)
   if (
     parsed.flow !== 'verify-blocked' &&
     parsed.firstClick &&
@@ -21,7 +39,7 @@ export async function getServerSideProps({ params, query }) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  // 🔐 verify nodig
+  // 🔐 verify nodig?
   if (
     (parsed.flow === 'verify' || parsed.flow === 'verify-blocked') &&
     !verified
