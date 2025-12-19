@@ -2,18 +2,20 @@ export async function getServerSideProps() {
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  // haal slugs uit lijst
-  const listRes = await fetch(`${redisUrl}/lrange/all-slugs/0/100`, {
+  const listRes = await fetch(`${redisUrl}/lrange/all-slugs/0/200`, {
     headers: { Authorization: `Bearer ${redisToken}` },
   });
 
-  const slugList = (await listRes.json()).result || [];
+  const raw = (await listRes.json()).result || [];
+  const uniqueSlugs = [...new Set(raw)];
+
   const slugs = [];
 
-  for (const slug of slugList) {
+  for (const slug of uniqueSlugs) {
     const res = await fetch(`${redisUrl}/get/slug-${slug}`, {
       headers: { Authorization: `Bearer ${redisToken}` },
     });
+
     const data = await res.json();
     if (data?.result) {
       slugs.push({
@@ -39,6 +41,12 @@ export default function Dashboard({ slugs }) {
             <strong>{s.slug}</strong>
           </a>
           <div>Flow: {s.flow}</div>
+          <div>
+            Eerste klik:{' '}
+            {s.firstClick
+              ? new Date(s.firstClick).toLocaleString()
+              : 'nog niet'}
+          </div>
         </div>
       ))}
     </div>
