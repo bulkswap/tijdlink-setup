@@ -4,11 +4,11 @@ export async function getServerSideProps({ params }) {
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  const keysRes = await fetch(`${redisUrl}/keys/log-${slug}-*`, {
+  const listRes = await fetch(`${redisUrl}/keys/log-${slug}-*`, {
     headers: { Authorization: `Bearer ${redisToken}` },
   });
 
-  const keys = (await keysRes.json()).result || [];
+  const keys = (await listRes.json()).result || [];
   const logs = [];
 
   for (const key of keys) {
@@ -39,6 +39,7 @@ export default function SlugDetail({ slug, logs }) {
           }}
         >
           <div><strong>Tijd:</strong> {new Date(log.time).toLocaleString()}</div>
+          <div><strong>IP:</strong> {log.ip}</div>
           <div><strong>User-Agent:</strong> {log.userAgent}</div>
           <div><strong>Lat:</strong> {log.lat}</div>
           <div><strong>Lng:</strong> {log.lng}</div>
