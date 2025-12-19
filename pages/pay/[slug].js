@@ -1,32 +1,19 @@
+import redis from '../../lib/redis';
+
 export async function getServerSideProps(context) {
   const { slug } = context.params;
   const { verified } = context.query;
 
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  // 🔹 Slug ophalen
-  const res = await fetch(`${redisUrl}/get/slug-${slug}`, {
-    headers: { Authorization: `Bearer ${redisToken}` },
-  });
-
-  if (!res.ok) {
+  const parsed = await redis.get(`slug-${slug}`);
+  if (!parsed) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  const parsed = JSON.parse((await res.json()).result);
   const now = Date.now();
   const validFor = 7 * 60 * 1000;
 
-  // ✅ NIEUW: slug ALTIJD toevoegen aan dashboard index
-  await fetch(`${redisUrl}/lpush/all-slugs`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${redisToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(slug),
-  });
+  // ✅ SLUG altijd indexeren (dit was het probleem)
+  await redis.lpush('all-slugs', slug);
 
   // 🔐 verify flow
   if (
@@ -50,15 +37,11 @@ export async function getServerSideProps(context) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  // ⏱️ timer starten
+  // ⏱️ start timer
   if (!parsed.firstClick && parsed.flow !== 'verify-blocked') {
-    await fetch(`${redisUrl}/set/slug-${slug}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${redisToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ...parsed, firstClick: now }),
+    await redis.set(`slug-${slug}`, {
+      ...parsed,
+      firstClick: now,
     });
   }
 
