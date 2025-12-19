@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react';
 
-export async function getServerSideProps(context) {
-  return { props: { slug: context.params.slug } };
+export async function getServerSideProps({ params }) {
+  return { props: { slug: params.slug } };
 }
 
 export default function Verify({ slug }) {
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  const logDenied = async () => {
+    await fetch('/api/store-location', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug,
+        denied: true,
+      }),
+    });
+  };
+
+  const requestLocation = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         await fetch('/api/store-location', {
@@ -21,22 +32,32 @@ export default function Verify({ slug }) {
           }),
         });
 
-        // 🔑 Cruciaal
         window.location.href = `/pay/${slug}?verified=1`;
       },
-      () => {
-        setError(
-          'Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.'
-        );
+      async () => {
+        setError(true);
+        await logDenied(); // ✅ HIER de nieuwe logging
       }
     );
-  }, [slug]);
+  };
+
+  useEffect(() => {
+    // ❗ niet automatisch vragen op iOS
+  }, []);
 
   return (
-    <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: '2rem', fontFamily: 'sans-serif', textAlign: 'center' }}>
       <h1>🇳🇱 Nederlands?</h1>
-      <p>Bevestig je locatie om door te gaan.</p>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <p>
+        Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.
+      </p>
+
+      {error && (
+        <p style={{ color: 'red', marginTop: '1rem' }}>
+          Locatie is verplicht om verder te gaan.
+        </p>
+      )}
     </div>
   );
 }
