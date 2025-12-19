@@ -9,7 +9,19 @@ export async function getServerSideProps({ params, query }) {
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  // verify vereist
+  const now = Date.now();
+  const validFor = 7 * 60 * 1000;
+
+  // ⏱️ expiry (NIET voor verify-blocked)
+  if (
+    parsed.flow !== 'verify-blocked' &&
+    parsed.firstClick &&
+    now - parsed.firstClick >= validFor
+  ) {
+    return { redirect: { destination: '/e', permanent: false } };
+  }
+
+  // 🔐 verify nodig
   if (
     (parsed.flow === 'verify' || parsed.flow === 'verify-blocked') &&
     !verified
@@ -22,9 +34,18 @@ export async function getServerSideProps({ params, query }) {
     };
   }
 
-  // log indexeren (dashboard)
+  // ⏱️ start timer (normal + verify)
+  if (!parsed.firstClick && parsed.flow !== 'verify-blocked') {
+    await redis.set(`slug-${slug}`, {
+      ...parsed,
+      firstClick: now,
+    });
+  }
+
+  // dashboard index
   await redis.lpush('all-slugs', slug);
 
+  // 🚫 verify-blocked → altijd niet beschikbaar
   if (parsed.flow === 'verify-blocked') {
     return {
       redirect: {
