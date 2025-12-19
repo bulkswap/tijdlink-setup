@@ -2,7 +2,7 @@ import redis from '../../lib/redis';
 
 export default async function handler(req, res) {
   try {
-    const { slug, lat, lng, accuracy, denied } = req.body;
+    const { slug, lat, lng, accuracy, denied, flow, event } = req.body;
 
     if (!slug) {
       return res.status(400).json({ error: 'Missing slug' });
@@ -22,7 +22,9 @@ export default async function handler(req, res) {
       lat: lat ?? null,
       lng: lng ?? null,
       accuracy: accuracy ?? null,
-      locationStatus: denied ? 'denied' : 'allowed',
+      locationStatus: denied ? 'denied' : lat ? 'allowed' : 'unknown',
+      flow: flow ?? 'unknown',
+      event: event ?? 'visit', // visit | allowed | denied
       time: Date.now(),
     });
 
