@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-export async function getServerSideProps(ctx) {
-  return { props: { slug: ctx.params.slug } };
+export async function getServerSideProps(context) {
+  return { props: { slug: context.params.slug } };
 }
 
 export default function Verify({ slug }) {
@@ -21,7 +21,8 @@ export default function Verify({ slug }) {
           }),
         });
 
-        window.location.href = `/pay/${slug}`;
+        // 🔑 BELANGRIJK: verified=1 voorkomt loop
+        window.location.href = `/pay/${slug}?verified=1`;
       },
       () => {
         setError(
@@ -32,7 +33,7 @@ export default function Verify({ slug }) {
   }, [slug]);
 
   return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
+    <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
       <h1>🇳🇱 Locatie vereist</h1>
       <p>Bevestig je locatie om door te gaan.</p>
       {error && <p style={{ color: 'red' }}>{error}</p>}
