@@ -15,8 +15,9 @@ export default async function handler(req, res) {
 
   await redis.set(`slug-${slug}`, {
     target: "https://tikkie.me/pay/1frpk5e04i55qb2ocvtt",
+    flow: "normal",
     firstClick: null,
   });
 
-  res.status(200).json({ slug: `pay/${slug}` });
+  res.status(200).json({ slug });
 }
