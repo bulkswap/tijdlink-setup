@@ -21,19 +21,24 @@ export default function Dashboard({ logs }) {
 
       {logs.length === 0 && <p>Nog geen kliks.</p>}
 
-      <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table
+        border="1"
+        cellPadding="8"
+        style={{ width: '100%', borderCollapse: 'collapse' }}
+      >
         <thead>
           <tr>
             <th>Tijd</th>
             <th>Slug</th>
+            <th>Pay link</th>
             <th>Flow</th>
             <th>Event</th>
-            <th>Pay link</th>
             <th>IP</th>
             <th>Locatie</th>
             <th>Status</th>
           </tr>
         </thead>
+
         <tbody>
           {logs.map((log, i) => (
             <tr key={i}>
@@ -54,11 +59,14 @@ export default function Dashboard({ logs }) {
                   /pay/{log.slug}
                 </a>
               </td>
-                  
-              <td>{log.flow}</td>
-                  
-              <td>{log.event}</td>
 
+              <td>{log.flow}</td>
+
+              <td>
+                {log.event === 'expired-hit'
+                  ? '⏱️ expired-hit'
+                  : log.event}
+              </td>
 
               <td>{log.ip}</td>
 
@@ -74,9 +82,13 @@ export default function Dashboard({ logs }) {
               </td>
 
               <td>
-                {log.locationStatus === 'denied'
+                {log.event === 'expired-hit'
+                  ? '⏱️ Verlopen link'
+                  : log.locationStatus === 'denied'
                   ? '❌ Locatie geweigerd'
-                  : '✅ Locatie toegestaan'}
+                  : log.locationStatus === 'allowed'
+                  ? '✅ Locatie toegestaan'
+                  : '—'}
               </td>
             </tr>
           ))}
