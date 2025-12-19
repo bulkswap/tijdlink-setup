@@ -21,7 +21,7 @@ export default function Verify({ slug }) {
           }),
         });
 
-        // 🔑 BELANGRIJK: verified=1 voorkomt loop
+        // 🔑 Cruciaal
         window.location.href = `/pay/${slug}?verified=1`;
       },
       () => {
