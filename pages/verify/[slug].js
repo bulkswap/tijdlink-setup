@@ -34,7 +34,7 @@ export default function Verify({ slug }) {
 
   return (
     <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
-      <h1>🇳🇱 Locatie vereist</h1>
+      <h1>🇳🇱 Nederlands?</h1>
       <p>Bevestig je locatie om door te gaan.</p>
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
