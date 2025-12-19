@@ -1,6 +1,29 @@
 import redis from '../../lib/redis';
 
-export async function getServerSideProps() {
+export async function getServerSideProps({ req, res }) {
+  const auth = req.headers.authorization;
+  const PASSWORD = '2026';
+
+  if (!auth) {
+    res.statusCode = 401;
+    res.setHeader('WWW-Authenticate', 'Basic realm="Dashboard"');
+    res.end('Auth required');
+    return { props: {} };
+  }
+
+  const [, base64] = auth.split(' ');
+  const [, enteredPassword] = Buffer.from(base64, 'base64')
+    .toString()
+    .split(':');
+
+  if (enteredPassword !== PASSWORD) {
+    res.statusCode = 401;
+    res.setHeader('WWW-Authenticate', 'Basic realm="Dashboard"');
+    res.end('Wrong password');
+    return { props: {} };
+  }
+
+  // 🔹 Logs ophalen
   const keys = await redis.keys('log-*');
   const logs = [];
 
@@ -9,13 +32,12 @@ export async function getServerSideProps() {
     if (data) logs.push(data);
   }
 
-  // nieuwste bovenaan
   logs.sort((a, b) => b.time - a.time);
 
   return { props: { logs } };
 }
 
-export default function Dashboard({ logs }) {
+export default function Dashboard({ logs = [] }) {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>Dashboard – Kliklog</h1>
@@ -49,7 +71,7 @@ export default function Dashboard({ logs }) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    📍 Bekijk op kaart
+                    📍 Google Maps
                   </a>
                 ) : '—'}
               </td>
