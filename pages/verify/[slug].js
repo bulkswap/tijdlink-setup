@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 
-export async function getServerSideProps({ params }) {
-  return { props: { slug: params.slug } };
+export async function getServerSideProps(context) {
+  return { props: { slug: context.params.slug } };
 }
 
 export default function Verify({ slug }) {
-  const [error, setError] = useState(false);
+  const [error, setError] = useState(null);
 
-  const requestLocation = () => {
+  useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         await fetch('/api/store-location', {
@@ -21,49 +21,22 @@ export default function Verify({ slug }) {
           }),
         });
 
+        // 🔑 Cruciaal
         window.location.href = `/pay/${slug}?verified=1`;
       },
-      () => setError(true)
+      () => {
+        setError(
+          'Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.'
+        );
+      }
     );
-  };
-
-  useEffect(() => {
-    requestLocation();
-  }, []);
+  }, [slug]);
 
   return (
-    <div
-      style={{
-        padding: '2rem',
-        fontFamily: 'sans-serif',
-        textAlign: 'center',
-      }}
-    >
-      <h1>🇳🇱 Bevestig dat je uit Nederland komt</h1>
-
-      <p>
-        Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.
-      </p>
-
-      <p>
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            requestLocation();
-          }}
-          style={{ color: '#0066cc', textDecoration: 'underline' }}
-        >
-          Klik hier om te bevestigen dat je uit Nederland komt
-          (locatie-instellingen)
-        </a>
-      </p>
-
-      {error && (
-        <p style={{ color: 'red', marginTop: '1rem' }}>
-          Locatie is verplicht om verder te gaan.
-        </p>
-      )}
+    <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
+      <h1>🇳🇱 Locatie vereist</h1>
+      <p>Bevestig je locatie om door te gaan.</p>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
   );
 }
