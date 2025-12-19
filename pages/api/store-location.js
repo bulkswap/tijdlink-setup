@@ -1,33 +1,34 @@
+import redis from '../../lib/redis';
+
 export default async function handler(req, res) {
-  const { slug, lat, lng, accuracy, denied } = req.body;
+  try {
+    const { slug, lat, lng, accuracy, denied } = req.body;
 
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+    if (!slug) {
+      return res.status(400).json({ error: 'Missing slug' });
+    }
 
-  const ip =
-    req.headers['x-forwarded-for']?.split(',')[0] ||
-    req.socket?.remoteAddress ||
-    'unknown';
+    const ip =
+      req.headers['x-forwarded-for']?.split(',')[0] ||
+      req.socket?.remoteAddress ||
+      'unknown';
 
-  const userAgent = req.headers['user-agent'] || 'unknown';
+    const userAgent = req.headers['user-agent'] || 'unknown';
 
-  await fetch(`${redisUrl}/set/log-${slug}-${Date.now()}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${redisToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+    await redis.set(`log-${slug}-${Date.now()}`, {
       slug,
       ip,
       userAgent,
-      lat: lat || null,
-      lng: lng || null,
-      accuracy: accuracy || null,
+      lat: lat ?? null,
+      lng: lng ?? null,
+      accuracy: accuracy ?? null,
       locationStatus: denied ? 'denied' : 'allowed',
       time: Date.now(),
-    }),
-  });
+    });
 
-  res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('store-location error', err);
+    return res.status(500).json({ error: 'internal error' });
+  }
 }
