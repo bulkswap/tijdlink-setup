@@ -2,22 +2,23 @@ export async function getServerSideProps() {
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-  const keysRes = await fetch(`${redisUrl}/keys/slug-*`, {
+  // haal slugs uit lijst
+  const listRes = await fetch(`${redisUrl}/lrange/all-slugs/0/100`, {
     headers: { Authorization: `Bearer ${redisToken}` },
   });
 
-  const keys = (await keysRes.json()).result || [];
+  const slugList = (await listRes.json()).result || [];
   const slugs = [];
 
-  for (const key of keys) {
-    const res = await fetch(`${redisUrl}/get/${key}`, {
+  for (const slug of slugList) {
+    const res = await fetch(`${redisUrl}/get/slug-${slug}`, {
       headers: { Authorization: `Bearer ${redisToken}` },
     });
-    const val = await res.json();
-    if (val?.result) {
+    const data = await res.json();
+    if (data?.result) {
       slugs.push({
-        slug: key.replace('slug-', ''),
-        ...JSON.parse(val.result),
+        slug,
+        ...JSON.parse(data.result),
       });
     }
   }
@@ -30,13 +31,14 @@ export default function Dashboard({ slugs }) {
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>Dashboard</h1>
 
+      {slugs.length === 0 && <p>Nog geen links.</p>}
+
       {slugs.map((s) => (
         <div key={s.slug} style={{ marginBottom: '1rem' }}>
           <a href={`/dashboard/${s.slug}`}>
             <strong>{s.slug}</strong>
           </a>
-          <br />
-          Flow: {s.flow}
+          <div>Flow: {s.flow}</div>
         </div>
       ))}
     </div>
