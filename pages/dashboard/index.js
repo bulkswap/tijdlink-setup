@@ -1,16 +1,6 @@
 import redis from '../../lib/redis';
 
-export async function getServerSideProps({ query }) {
-  // 🔐 simpel passwords check
-  if (query.p !== '2026') {
-    return {
-      redirect: {
-        destination: '/dashboard-login',
-        permanent: false,
-      },
-    };
-  }
-
+export async function getServerSideProps() {
   const keys = await redis.keys('log-*');
   const logs = [];
 
@@ -31,7 +21,11 @@ export default function Dashboard({ logs }) {
 
       {logs.length === 0 && <p>Nog geen kliks.</p>}
 
-      <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table
+        border="1"
+        cellPadding="8"
+        style={{ width: '100%', borderCollapse: 'collapse' }}
+      >
         <thead>
           <tr>
             <th>Tijd</th>
@@ -49,13 +43,33 @@ export default function Dashboard({ logs }) {
           {logs.map((log, i) => (
             <tr key={i}>
               <td>{new Date(log.time).toLocaleString()}</td>
-              <td>{log.slug}</td>
+
               <td>
-                <a href={`/pay/${log.slug}`} target="_blank">/pay/{log.slug}</a>
+                <a href={`/dashboard/${log.slug}`} target="_blank">
+                  {log.slug}
+                </a>
               </td>
+
+              <td>
+                <a
+                  href={`/pay/${log.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  /pay/{log.slug}
+                </a>
+              </td>
+
               <td>{log.flow}</td>
-              <td>{log.event}</td>
+
+              <td>
+                {log.event === 'expired-hit'
+                  ? '⏱️ expired-hit'
+                  : log.event}
+              </td>
+
               <td>{log.ip}</td>
+
               <td>
                 {log.lat && log.lng ? (
                   <a
@@ -66,13 +80,14 @@ export default function Dashboard({ logs }) {
                   </a>
                 ) : '—'}
               </td>
+
               <td>
                 {log.event === 'expired-hit'
-                  ? '⏱️ Verlopen'
+                  ? '⏱️ Verlopen link'
                   : log.locationStatus === 'denied'
-                  ? '❌ Geweigerd'
+                  ? '❌ Locatie geweigerd'
                   : log.locationStatus === 'allowed'
-                  ? '✅ Toegestaan'
+                  ? '✅ Locatie toegestaan'
                   : '—'}
               </td>
             </tr>
