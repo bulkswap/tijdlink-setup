@@ -1,7 +1,7 @@
 import redis from '../../lib/redis';
 
 export async function getServerSideProps({ query }) {
-  // 🔐 simpele password check
+  // 🔐 simpel password check
   if (query.p !== '2026') {
     return {
       redirect: {
