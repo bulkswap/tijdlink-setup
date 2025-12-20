@@ -11,7 +11,7 @@ export default function DashboardLogin() {
   return (
     <div style={{ padding: '3rem', fontFamily: 'sans-serif' }}>
       <h1>Dashboard</h1>
-      <button onClick={login}>Inloggen.</button>
+      <button onClick={login}>Inloggen</button>
     </div>
   );
 }
