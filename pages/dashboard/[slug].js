@@ -17,44 +17,52 @@ export async function getServerSideProps({ params }) {
     props: {
       slug,
       logs,
-      count: logs.length,
     },
   };
 }
 
-export default function SlugDetail({ slug, logs, count }) {
+export default function SlugDetail({ slug, logs }) {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Slug: {slug}</h1>
-      <p><strong>Aantal bezoeken:</strong> {count}</p>
+      <h1>Details voor slug: {slug}</h1>
+
+      <p>
+        <a href={`/pay/${slug}`} target="_blank">
+          👉 Open pay link
+        </a>
+      </p>
+
+      {logs.length === 0 && <p>Geen kliks voor deze slug.</p>}
 
       <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
             <th>Tijd</th>
+            <th>Flow</th>
+            <th>Event</th>
             <th>IP</th>
             <th>Locatie</th>
-            <th>User Agent</th>
           </tr>
         </thead>
         <tbody>
           {logs.map((log, i) => (
             <tr key={i}>
               <td>{new Date(log.time).toLocaleString()}</td>
+              <td>{log.flow}</td>
+              <td>{log.event}</td>
               <td>{log.ip}</td>
+
               <td>
                 {log.lat && log.lng ? (
                   <a
                     href={`https://www.google.com/maps?q=${log.lat},${log.lng}`}
                     target="_blank"
-                    rel="noopener noreferrer"
                   >
-                    📍 Open in Google Maps
+                    📍 kaart
                   </a>
-                ) : '—'}
-              </td>
-              <td title={log.userAgent}>
-                {log.userAgent?.slice(0, 50)}…
+                ) : (
+                  '—'
+                )}
               </td>
             </tr>
           ))}
