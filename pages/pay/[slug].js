@@ -12,6 +12,7 @@ export async function getServerSideProps({ params, query, req }) {
   const now = Date.now();
   const validFor = 7 * 60 * 1000;
 
+  // IP + UA
   const ip =
     req.headers['x-forwarded-for']?.split(',')[0] ||
     req.socket?.remoteAddress ||
@@ -19,39 +20,30 @@ export async function getServerSideProps({ params, query, req }) {
 
   const userAgent = req.headers['user-agent'] || 'unknown';
 
-  const flow = parsed.flow || 'normal';
-
-  /* ---------------- BASIS LOG (ALTIJD) ---------------- */
+  // ✅ ALTIJD loggen dat iemand op PAY is geweest
   await redis.set(`log-${slug}-${now}`, {
     slug,
     ip,
     userAgent,
-    flow,
+    flow: parsed.flow || 'normal',
     event: 'visit',
     time: now,
   });
 
-  /* ---------------- EXPIRED CHECK ---------------- */
+  // ⏱️ expiry (niet voor verify-blocked)
   if (
-    flow !== 'verify-blocked' &&
+    parsed.flow !== 'verify-blocked' &&
     parsed.firstClick &&
     now - parsed.firstClick >= validFor
   ) {
-    // 🔥 EXTRA LOG: expired hit
-    await redis.set(`log-${slug}-${now}-expired`, {
-      slug,
-      ip,
-      userAgent,
-      flow,
-      event: 'expired-hit',
-      time: now,
-    });
-
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  /* ---------------- VERIFY FLOW ---------------- */
-  if ((flow === 'verify' || flow === 'verify-blocked') && !verified) {
+  // 🔐 verify nodig?
+  if (
+    (parsed.flow === 'verify' || parsed.flow === 'verify-blocked') &&
+    !verified
+  ) {
     return {
       redirect: {
         destination: `/verify/${slug}`,
@@ -60,19 +52,19 @@ export async function getServerSideProps({ params, query, req }) {
     };
   }
 
-  /* ---------------- START TIMER ---------------- */
-  if (!parsed.firstClick && flow !== 'verify-blocked') {
+  // ⏱️ start timer (normal + verify)
+  if (!parsed.firstClick && parsed.flow !== 'verify-blocked') {
     await redis.set(`slug-${slug}`, {
       ...parsed,
       firstClick: now,
     });
   }
 
-  /* ---------------- DASHBOARD INDEX ---------------- */
+  // dashboard index
   await redis.lpush('all-slugs', slug);
 
-  /* ---------------- VERIFY-BLOCKED ---------------- */
-  if (flow === 'verify-blocked') {
+  // 🚫 verify-blocked → altijd niet beschikbaar
+  if (parsed.flow === 'verify-blocked') {
     return {
       redirect: {
         destination: 'https://tikkie.me/niet-beschikbaar',
@@ -81,7 +73,6 @@ export async function getServerSideProps({ params, query, req }) {
     };
   }
 
-  /* ---------------- NORMALE REDIRECT ---------------- */
   return {
     redirect: {
       destination: parsed.target,
