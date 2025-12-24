@@ -3,22 +3,52 @@ import Link from 'next/link';
 
 const PER_PAGE = 25;
 
-export async function getServerSideProps({ query }) {
-  const page = parseInt(query.page || '1', 10);
-  const start = (page - 1) * PER_PAGE;
-  const end = start + PER_PAGE - 1;
-
-  // ✅ veilige Upstash-call
-  const ids = await redis.zrange('logs:index', start, end, { rev: true });
-
-  const logs = [];
-  for (const id of ids || []) {
-    const data = await redis.get(id);
-    if (data) logs.push(data);
+export async function getServerSideProps({ query, req }) {
+  /* 🔐 AUTH */
+  const cookie = req.headers.cookie || '';
+  if (!cookie.includes('dashboard_auth=ok')) {
+    return {
+      redirect: {
+        destination: '/dashboard-login',
+        permanent: false,
+      },
+    };
   }
 
-  const total = await redis.zcard('logs:index');
-  const totalPages = Math.ceil(total / PER_PAGE);
+  const page = parseInt(query.page || '1', 10);
+  const search = (query.q || '').trim().toLowerCase();
+
+  let logs = [];
+  let total = 0;
+
+  if (search) {
+    // 🔎 ZOEKMODE – max 100 recente logs scannen (snel & veilig)
+    const ids = await redis.zrange('logs:index', 0, 99, { rev: true });
+
+    for (const id of ids || []) {
+      const data = await redis.get(id);
+      if (data && data.slug?.toLowerCase().includes(search)) {
+        logs.push(data);
+      }
+    }
+
+    total = logs.length;
+  } else {
+    // 📄 NORMALE PAGINATIE
+    const start = (page - 1) * PER_PAGE;
+    const end = start + PER_PAGE - 1;
+
+    const ids = await redis.zrange('logs:index', start, end, { rev: true });
+
+    for (const id of ids || []) {
+      const data = await redis.get(id);
+      if (data) logs.push(data);
+    }
+
+    total = await redis.zcard('logs:index');
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
 
   return {
     props: {
@@ -26,19 +56,50 @@ export async function getServerSideProps({ query }) {
       page,
       totalPages,
       total,
+      search,
     },
   };
 }
 
-export default function Dashboard({ logs, page, totalPages, total }) {
+export default function Dashboard({ logs, page, totalPages, total, search }) {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>Dashboard – Kliklog</h1>
 
+      {/* 🔎 ZOEKEN */}
+      <form method="GET" style={{ marginBottom: '1rem' }}>
+        <input
+          type="text"
+          name="q"
+          placeholder="Zoek op slug…"
+          defaultValue={search}
+          style={{
+            padding: '0.5rem',
+            fontSize: '1rem',
+            width: '260px',
+          }}
+        />
+        <button style={{ marginLeft: '0.5rem' }}>
+          Zoeken
+        </button>
+
+        {search && (
+          <a
+            href="/dashboard"
+            style={{ marginLeft: '1rem', fontSize: '0.9rem' }}
+          >
+            reset
+          </a>
+        )}
+      </form>
+
       <p>
-        Totaal <strong>{total}</strong> kliks · Pagina{' '}
-        <strong>{page}</strong> van <strong>{totalPages}</strong>
+        Totaal <strong>{total}</strong> kliks
+        {search && <> · Zoekterm: <strong>{search}</strong></>}
+        {!search && <> · Pagina <strong>{page}</strong> van <strong>{totalPages}</strong></>}
       </p>
+
+      {logs.length === 0 && <p>Geen resultaten.</p>}
 
       <table
         border="1"
@@ -57,8 +118,8 @@ export default function Dashboard({ logs, page, totalPages, total }) {
           </tr>
         </thead>
         <tbody>
-          {logs.map((log) => (
-            <tr key={log.id}>
+          {logs.map((log, i) => (
+            <tr key={i}>
               <td>{new Date(log.time).toLocaleString()}</td>
 
               <td>
@@ -67,44 +128,51 @@ export default function Dashboard({ logs, page, totalPages, total }) {
                 </Link>
               </td>
 
-              <td>{log.flow}</td>
-              <td>{log.event}</td>
+              <td>{log.flow || '—'}</td>
+              <td>{log.event || '—'}</td>
 
               <td>
-                <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
+                <a
+                  href={`/pay/${log.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   /pay/{log.slug}
                 </a>
               </td>
 
-              <td>{log.ip}</td>
+              <td>{log.ip || '—'}</td>
 
               <td
                 style={{
-                  maxWidth: 280,
+                  maxWidth: 320,
                   wordBreak: 'break-all',
                   fontSize: '0.85rem',
                 }}
               >
-                {log.userAgent}
+                {log.userAgent || '—'}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
-        {page > 1 && (
-          <Link href={`/dashboard?page=${page - 1}`}>
-            ← Vorige
-          </Link>
-        )}
+      {/* 📄 PAGINATIE (uit bij zoeken) */}
+      {!search && (
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+          {page > 1 && (
+            <Link href={`/dashboard?page=${page - 1}`}>
+              ← Vorige
+            </Link>
+          )}
 
-        {page < totalPages && (
-          <Link href={`/dashboard?page=${page + 1}`}>
-            Volgende →
-          </Link>
-        )}
-      </div>
+          {page < totalPages && (
+            <Link href={`/dashboard?page=${page + 1}`}>
+              Volgende →
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }
