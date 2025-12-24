@@ -1,11 +1,13 @@
+export const dynamic = 'force-dynamic';
+
 import redis from '../../lib/redis';
 import Link from 'next/link';
 
 const PER_PAGE = 25;
 
 export async function getServerSideProps({ query, req }) {
-  /* 🔐 AUTH CHECK */
-  const cookie = req.headers.cookie || '';
+  const cookie = req?.headers?.cookie || '';
+
   if (!cookie.includes('dashboard_auth=ok')) {
     return {
       redirect: {
@@ -22,7 +24,6 @@ export async function getServerSideProps({ query, req }) {
   let total = 0;
 
   if (search) {
-    // 🔎 ZOEKEN (max 100 recente logs, snel)
     const ids = await redis.zrange('logs:index', 0, 99, { rev: true });
 
     for (const id of ids || []) {
@@ -34,7 +35,6 @@ export async function getServerSideProps({ query, req }) {
 
     total = logs.length;
   } else {
-    // 📄 PAGINATIE
     const start = (page - 1) * PER_PAGE;
     const end = start + PER_PAGE - 1;
 
@@ -66,26 +66,18 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>Dashboard – Kliklog</h1>
 
-      {/* 🔎 ZOEKEN */}
       <form method="GET" style={{ marginBottom: '1rem' }}>
         <input
           type="text"
           name="q"
           placeholder="Zoek op slug…"
           defaultValue={search}
-          style={{
-            padding: '0.5rem',
-            fontSize: '1rem',
-            width: '260px',
-          }}
+          style={{ padding: '0.5rem', width: 260 }}
         />
         <button style={{ marginLeft: '0.5rem' }}>Zoeken</button>
 
         {search && (
-          <a
-            href="/dashboard"
-            style={{ marginLeft: '1rem', fontSize: '0.9rem' }}
-          >
+          <a href="/dashboard" style={{ marginLeft: '1rem' }}>
             reset
           </a>
         )}
@@ -93,30 +85,21 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
 
       <p>
         Totaal <strong>{total}</strong> kliks
-        {search && <> · Zoekterm: <strong>{search}</strong></>}
         {!search && (
-          <>
-            {' '}
-            · Pagina <strong>{page}</strong> van{' '}
-            <strong>{totalPages}</strong>
-          </>
+          <> · Pagina <strong>{page}</strong> van <strong>{totalPages}</strong></>
         )}
       </p>
 
       {logs.length === 0 && <p>Geen resultaten.</p>}
 
-      <table
-        border="1"
-        cellPadding="8"
-        style={{ width: '100%', borderCollapse: 'collapse' }}
-      >
+      <table border="1" cellPadding="8" style={{ width: '100%' }}>
         <thead>
           <tr>
             <th>Tijd</th>
             <th>Slug</th>
             <th>Flow</th>
             <th>Event</th>
-            <th>Pay link</th>
+            <th>Pay</th>
             <th>IP</th>
             <th>User Agent</th>
           </tr>
@@ -125,55 +108,35 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
           {logs.map((log, i) => (
             <tr key={i}>
               <td>{new Date(log.time).toLocaleString()}</td>
-
               <td>
                 <Link href={`/dashboard/${log.slug}`}>
                   {log.slug}
                 </Link>
               </td>
-
-              <td>{log.flow || '—'}</td>
-              <td>{log.event || '—'}</td>
-
+              <td>{log.flow}</td>
+              <td>{log.event}</td>
               <td>
-                <a
-                  href={`/pay/${log.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
                   /pay/{log.slug}
                 </a>
               </td>
-
-              <td>{log.ip || '—'}</td>
-
-              <td
-                style={{
-                  maxWidth: 320,
-                  wordBreak: 'break-all',
-                  fontSize: '0.85rem',
-                }}
-              >
-                {log.userAgent || '—'}
+              <td>{log.ip}</td>
+              <td style={{ maxWidth: 300, wordBreak: 'break-all' }}>
+                {log.userAgent}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* 📄 PAGINATIE */}
       {!search && (
-        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+        <div style={{ marginTop: '1rem' }}>
           {page > 1 && (
-            <Link href={`/dashboard?page=${page - 1}`}>
-              ← Vorige
-            </Link>
+            <Link href={`/dashboard?page=${page - 1}`}>← Vorige</Link>
           )}
-
+          {' '}
           {page < totalPages && (
-            <Link href={`/dashboard?page=${page + 1}`}>
-              Volgende →
-            </Link>
+            <Link href={`/dashboard?page=${page + 1}`}>Volgende →</Link>
           )}
         </div>
       )}
