@@ -3,16 +3,18 @@ export default function handler(req, res) {
     return res.status(405).end();
   }
 
-  const { password } = req.body;
+  const password = req.body?.password;
 
   if (password !== '2026') {
-    return res.status(401).json({ error: 'Invalid password' });
+    return res.status(401).send('Verkeerd wachtwoord');
   }
 
-  // 🔐 server-side cookie (werkt 100%)
+  // 🔐 COOKIE ZETTEN (server-side, altijd zichtbaar)
   res.setHeader('Set-Cookie', [
     'dashboard_auth=ok; Path=/; HttpOnly; Max-Age=86400; SameSite=Lax',
   ]);
 
-  return res.status(200).json({ ok: true });
+  // 👉 DIRECT REDIRECT NA LOGIN
+  res.writeHead(302, { Location: '/dashboard' });
+  res.end();
 }
