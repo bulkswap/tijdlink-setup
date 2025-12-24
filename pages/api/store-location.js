@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const {
     slug,
     flow = 'verify',
-    event,            // allowed | denied | visit
+    event,              // visit | allowed | denied
     lat,
     lng,
     accuracy,
@@ -28,31 +28,37 @@ export default async function handler(req, res) {
 
   const userAgent = req.headers['user-agent'] || 'unknown';
 
+  const id = `log-${slug}-${now}-${Math.random().toString(36).slice(2)}`;
+
   const log = {
-    id: `log-${slug}-${now}`,
+    id,
     slug,
     flow,
-    event,
+    event,                     // visit | allowed | denied
+    eventType: 'location',     // 🔑 CRUCIAAL
     ip,
     userAgent,
-    lat: lat ?? null,
-    lng: lng ?? null,
+
+    lat: typeof lat === 'number' ? lat : null,
+    lng: typeof lng === 'number' ? lng : null,
     accuracy: accuracy ?? null,
+
     locationStatus: denied
       ? 'denied'
       : lat && lng
       ? 'allowed'
       : 'unknown',
+
     time: now,
   };
 
-  /* 🔥 LOG OPSLAAN */
-  await redis.set(log.id, log);
+  // 🔥 opslaan
+  await redis.set(id, log);
 
-  /* 🔥 INDEX VOOR DASHBOARD */
+  // 🔥 indexeren voor dashboard
   await redis.zadd('logs:index', {
     score: now,
-    member: log.id,
+    member: id,
   });
 
   return res.status(200).json({ ok: true });
