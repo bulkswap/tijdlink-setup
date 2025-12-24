@@ -1,13 +1,11 @@
-export const dynamic = 'force-dynamic';
-
 import redis from '../../lib/redis';
 import Link from 'next/link';
 
 const PER_PAGE = 25;
 
 export async function getServerSideProps({ query, req }) {
-  const cookie = req?.headers?.cookie || '';
-
+  /* 🔐 AUTH CHECK */
+  const cookie = req.headers.cookie || '';
   if (!cookie.includes('dashboard_auth=ok')) {
     return {
       redirect: {
@@ -24,6 +22,7 @@ export async function getServerSideProps({ query, req }) {
   let total = 0;
 
   if (search) {
+    // 🔎 Zoek in max 100 recente logs (snel)
     const ids = await redis.zrange('logs:index', 0, 99, { rev: true });
 
     for (const id of ids || []) {
@@ -66,6 +65,7 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>Dashboard – Kliklog</h1>
 
+      {/* 🔎 ZOEKEN */}
       <form method="GET" style={{ marginBottom: '1rem' }}>
         <input
           type="text"
@@ -86,7 +86,10 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
       <p>
         Totaal <strong>{total}</strong> kliks
         {!search && (
-          <> · Pagina <strong>{page}</strong> van <strong>{totalPages}</strong></>
+          <>
+            {' '}· Pagina <strong>{page}</strong> van{' '}
+            <strong>{totalPages}</strong>
+          </>
         )}
       </p>
 
@@ -113,16 +116,16 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
                   {log.slug}
                 </Link>
               </td>
-              <td>{log.flow}</td>
-              <td>{log.event}</td>
+              <td>{log.flow || '—'}</td>
+              <td>{log.event || '—'}</td>
               <td>
                 <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
                   /pay/{log.slug}
                 </a>
               </td>
-              <td>{log.ip}</td>
+              <td>{log.ip || '—'}</td>
               <td style={{ maxWidth: 300, wordBreak: 'break-all' }}>
-                {log.userAgent}
+                {log.userAgent || '—'}
               </td>
             </tr>
           ))}
@@ -132,11 +135,15 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
       {!search && (
         <div style={{ marginTop: '1rem' }}>
           {page > 1 && (
-            <Link href={`/dashboard?page=${page - 1}`}>← Vorige</Link>
+            <Link href={`/dashboard?page=${page - 1}`}>
+              ← Vorige
+            </Link>
           )}
           {' '}
           {page < totalPages && (
-            <Link href={`/dashboard?page=${page + 1}`}>Volgende →</Link>
+            <Link href={`/dashboard?page=${page + 1}`}>
+              Volgende →
+            </Link>
           )}
         </div>
       )}
