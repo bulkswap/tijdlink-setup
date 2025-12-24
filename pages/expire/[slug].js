@@ -1,41 +1,54 @@
-export async function getServerSideProps(context) {
-  const { slug } = context.params;
+import redis from '../../lib/redis';
 
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+export async function getServerSideProps({ params, req }) {
+  const { slug } = params;
 
-  const response = await fetch(`${redisUrl}/get/slug-${slug}`, {
-    headers: {
-      Authorization: `Bearer ${redisToken}`,
-    },
-  });
-
-  const data = await response.json();
-
-  if (!data?.result) {
+  const parsed = await redis.get(`slug-${slug}`);
+  if (!parsed) {
     return { notFound: true };
   }
 
-  let parsed;
-  try {
-    parsed = JSON.parse(data.result);
-  } catch {
-    return { notFound: true };
-  }
+  const now = Date.now();
 
-  // ✅ Zet expired op true
-  await fetch(`${redisUrl}/set/slug-${slug}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${redisToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ ...parsed, expired: true })
+  const ip =
+    req.headers['x-forwarded-for']?.split(',')[0] ||
+    req.socket?.remoteAddress ||
+    'unknown';
+
+  const userAgent = req.headers['user-agent'] || 'unknown';
+
+  /* --------------------------------------------------
+     SLUG HANDMATIG LATEN VERLOPEN
+  -------------------------------------------------- */
+  await redis.set(`slug-${slug}`, {
+    ...parsed,
+    expired: true,
   });
 
-  return {
-    props: {},
+  /* --------------------------------------------------
+     LOG: handmatig expired
+  -------------------------------------------------- */
+  const logId = `log-${slug}-${now}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
+
+  const logData = {
+    id: logId,
+    slug,
+    flow: 'system',
+    event: 'slug-expired-manual',
+    ip,
+    userAgent,
+    time: now,
   };
+
+  await redis.set(logId, logData);
+  await redis.zadd('logs:index', {
+    score: now,
+    member: logId,
+  });
+
+  return { props: {} };
 }
 
 export default function Expired() {
