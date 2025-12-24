@@ -1,20 +1,36 @@
-export default function handler(req, res) {
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).end();
+    res.status(405).end();
+    return;
   }
 
-  const password = req.body?.password;
+  let body = '';
+  await new Promise((resolve) => {
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+    req.on('end', resolve);
+  });
+
+  const params = new URLSearchParams(body);
+  const password = params.get('password');
 
   if (password !== '2026') {
-    return res.status(401).send('Verkeerd wachtwoord');
+    res.status(401).send('Verkeerd wachtwoord');
+    return;
   }
 
-  // 🔐 COOKIE ZETTEN (server-side, altijd zichtbaar)
-  res.setHeader('Set-Cookie', [
-    'dashboard_auth=ok; Path=/; HttpOnly; Max-Age=86400; SameSite=Lax',
-  ]);
+  res.setHeader(
+    'Set-Cookie',
+    'dashboard_auth=ok; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400'
+  );
 
-  // 👉 DIRECT REDIRECT NA LOGIN
   res.writeHead(302, { Location: '/dashboard' });
   res.end();
 }
