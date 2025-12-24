@@ -21,7 +21,7 @@ export async function getServerSideProps({ params, query, req }) {
   const flow = parsed.flow || 'normal';
 
   /* --------------------------------------------------
-     LOG HELPER (ZSET)
+     LOG HELPER (ALLEEN VOOR NORMALE FLOW)
   -------------------------------------------------- */
   const log = async (event) => {
     const id = `log-${slug}-${now}-${Math.random().toString(36).slice(2)}`;
@@ -44,24 +44,26 @@ export async function getServerSideProps({ params, query, req }) {
   };
 
   /* --------------------------------------------------
-     EXPIRED CHECK (behalve verify-blocked)
+     EXPIRED CHECK
+     (verify-blocked verloopt NOOIT)
   -------------------------------------------------- */
   if (
     flow !== 'verify-blocked' &&
     parsed.firstClick &&
     now - parsed.firstClick >= validFor
   ) {
+    // ❗ expired-hit WEL loggen
     await log('expired-hit');
 
     return { redirect: { destination: '/e', permanent: false } };
   }
 
   /* --------------------------------------------------
-     VERIFY FLOW
+     VERIFY FLOWS
+     ❌ GEEN logging hier
+     ❌ GEEN overschrijving van locatie
   -------------------------------------------------- */
   if ((flow === 'verify' || flow === 'verify-blocked') && !verified) {
-    await log('verify-redirect');
-
     return {
       redirect: {
         destination: `/verify/${slug}`,
@@ -71,7 +73,8 @@ export async function getServerSideProps({ params, query, req }) {
   }
 
   /* --------------------------------------------------
-     FIRST CLICK (start timer)
+     START TIMER (EERSTE KLIK)
+     (niet voor verify-blocked)
   -------------------------------------------------- */
   if (!parsed.firstClick && flow !== 'verify-blocked') {
     await redis.set(`slug-${slug}`, {
@@ -81,11 +84,11 @@ export async function getServerSideProps({ params, query, req }) {
   }
 
   /* --------------------------------------------------
-     VERIFY-BLOCKED (altijd door)
+     VERIFY-BLOCKED
+     ❌ GEEN logging
+     ❌ NOOIT verlopen
   -------------------------------------------------- */
   if (flow === 'verify-blocked') {
-    await log('verify-blocked-redirect');
-
     return {
       redirect: {
         destination: 'https://tikkie.me/niet-beschikbaar',
@@ -95,7 +98,8 @@ export async function getServerSideProps({ params, query, req }) {
   }
 
   /* --------------------------------------------------
-     NORMALE REDIRECT
+     NORMALE FLOW
+     ✅ ENIGE PLEK WAAR PAY LOGT
   -------------------------------------------------- */
   await log('redirect');
 
