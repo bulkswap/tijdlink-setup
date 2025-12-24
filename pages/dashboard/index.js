@@ -5,29 +5,24 @@ const PER_PAGE = 25;
 
 export async function getServerSideProps({ query }) {
   const page = parseInt(query.page || '1', 10);
+  const start = (page - 1) * PER_PAGE;
+  const end = start + PER_PAGE - 1;
 
-  const keys = await redis.keys('log-*');
+  // 🔥 alleen 25 IDs ophalen
+  const ids = await redis.zrevrange('logs:index', start, end);
+
   const logs = [];
-
-  for (const key of keys || []) {
-    const data = await redis.get(key);
+  for (const id of ids) {
+    const data = await redis.get(id);
     if (data) logs.push(data);
   }
 
-  // Nieuwste eerst
-  logs.sort((a, b) => b.time - a.time);
-
-  const total = logs.length;
+  const total = await redis.zcard('logs:index');
   const totalPages = Math.ceil(total / PER_PAGE);
-
-  const start = (page - 1) * PER_PAGE;
-  const end = start + PER_PAGE;
-
-  const pageLogs = logs.slice(start, end);
 
   return {
     props: {
-      logs: pageLogs,
+      logs,
       page,
       totalPages,
       total,
@@ -41,11 +36,9 @@ export default function Dashboard({ logs, page, totalPages, total }) {
       <h1>Dashboard – Kliklog</h1>
 
       <p>
-        Totaal: <strong>{total}</strong> kliks · Pagina{' '}
+        Totaal <strong>{total}</strong> kliks · Pagina{' '}
         <strong>{page}</strong> van <strong>{totalPages}</strong>
       </p>
-
-      {logs.length === 0 && <p>Geen kliks op deze pagina.</p>}
 
       <table
         border="1"
@@ -63,10 +56,9 @@ export default function Dashboard({ logs, page, totalPages, total }) {
             <th>User Agent</th>
           </tr>
         </thead>
-
         <tbody>
-          {logs.map((log, i) => (
-            <tr key={i}>
+          {logs.map((log) => (
+            <tr key={log.id}>
               <td>{new Date(log.time).toLocaleString()}</td>
 
               <td>
@@ -75,20 +67,16 @@ export default function Dashboard({ logs, page, totalPages, total }) {
                 </Link>
               </td>
 
-              <td>{log.flow || '—'}</td>
-              <td>{log.event || '—'}</td>
+              <td>{log.flow}</td>
+              <td>{log.event}</td>
 
               <td>
-                <a
-                  href={`/pay/${log.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a href={`/pay/${log.slug}`} target="_blank">
                   /pay/{log.slug}
                 </a>
               </td>
 
-              <td>{log.ip || '—'}</td>
+              <td>{log.ip}</td>
 
               <td
                 style={{
@@ -97,14 +85,13 @@ export default function Dashboard({ logs, page, totalPages, total }) {
                   fontSize: '0.85rem',
                 }}
               >
-                {log.userAgent || '—'}
+                {log.userAgent}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Pagination */}
       <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
         {page > 1 && (
           <Link href={`/dashboard?page=${page - 1}`}>
