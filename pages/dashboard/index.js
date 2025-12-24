@@ -1,25 +1,10 @@
-export async function getServerSideProps({ req, query }) {
-  const cookie = req.headers.cookie || '';
-
-  if (!cookie.includes('dashboard_auth=ok')) {
-    return {
-      redirect: {
-        destination: '/dashboard-login',
-        permanent: false,
-      },
-    };
-  }
-
-  // rest van je dashboard code…
-}
-
 import redis from '../../lib/redis';
 import Link from 'next/link';
 
 const PER_PAGE = 25;
 
 export async function getServerSideProps({ query, req }) {
-  /* 🔐 AUTH */
+  /* 🔐 AUTH CHECK */
   const cookie = req.headers.cookie || '';
   if (!cookie.includes('dashboard_auth=ok')) {
     return {
@@ -37,7 +22,7 @@ export async function getServerSideProps({ query, req }) {
   let total = 0;
 
   if (search) {
-    // 🔎 ZOEKMODE – max 100 recente logs scannen (snel & veilig)
+    // 🔎 ZOEKEN (max 100 recente logs, snel)
     const ids = await redis.zrange('logs:index', 0, 99, { rev: true });
 
     for (const id of ids || []) {
@@ -49,7 +34,7 @@ export async function getServerSideProps({ query, req }) {
 
     total = logs.length;
   } else {
-    // 📄 NORMALE PAGINATIE
+    // 📄 PAGINATIE
     const start = (page - 1) * PER_PAGE;
     const end = start + PER_PAGE - 1;
 
@@ -94,9 +79,7 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
             width: '260px',
           }}
         />
-        <button style={{ marginLeft: '0.5rem' }}>
-          Zoeken
-        </button>
+        <button style={{ marginLeft: '0.5rem' }}>Zoeken</button>
 
         {search && (
           <a
@@ -111,7 +94,13 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
       <p>
         Totaal <strong>{total}</strong> kliks
         {search && <> · Zoekterm: <strong>{search}</strong></>}
-        {!search && <> · Pagina <strong>{page}</strong> van <strong>{totalPages}</strong></>}
+        {!search && (
+          <>
+            {' '}
+            · Pagina <strong>{page}</strong> van{' '}
+            <strong>{totalPages}</strong>
+          </>
+        )}
       </p>
 
       {logs.length === 0 && <p>Geen resultaten.</p>}
@@ -172,7 +161,7 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
         </tbody>
       </table>
 
-      {/* 📄 PAGINATIE (uit bij zoeken) */}
+      {/* 📄 PAGINATIE */}
       {!search && (
         <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
           {page > 1 && (
