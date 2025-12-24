@@ -1,7 +1,11 @@
 import redis from '../../lib/redis';
 import Link from 'next/link';
 
-export async function getServerSideProps() {
+const PER_PAGE = 25;
+
+export async function getServerSideProps({ query }) {
+  const page = parseInt(query.page || '1', 10);
+
   const keys = await redis.keys('log-*');
   const logs = [];
 
@@ -10,25 +14,38 @@ export async function getServerSideProps() {
     if (data) logs.push(data);
   }
 
-  // Nieuw → sorteer nieuwste eerst
+  // Nieuwste eerst
   logs.sort((a, b) => b.time - a.time);
 
-  // Nieuw → max 50 entries
-  const limitedLogs = logs.slice(0, 50);
+  const total = logs.length;
+  const totalPages = Math.ceil(total / PER_PAGE);
+
+  const start = (page - 1) * PER_PAGE;
+  const end = start + PER_PAGE;
+
+  const pageLogs = logs.slice(start, end);
 
   return {
     props: {
-      logs: limitedLogs,
+      logs: pageLogs,
+      page,
+      totalPages,
+      total,
     },
   };
 }
 
-export default function Dashboard({ logs }) {
+export default function Dashboard({ logs, page, totalPages, total }) {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Dashboard – Laatste 50 kliks</h1>
+      <h1>Dashboard – Kliklog</h1>
 
-      {logs.length === 0 && <p>Nog geen kliks.</p>}
+      <p>
+        Totaal: <strong>{total}</strong> kliks · Pagina{' '}
+        <strong>{page}</strong> van <strong>{totalPages}</strong>
+      </p>
+
+      {logs.length === 0 && <p>Geen kliks op deze pagina.</p>}
 
       <table
         border="1"
@@ -43,9 +60,10 @@ export default function Dashboard({ logs }) {
             <th>Event</th>
             <th>Pay link</th>
             <th>IP</th>
-            <th>User-Agent</th>
+            <th>User Agent</th>
           </tr>
         </thead>
+
         <tbody>
           {logs.map((log, i) => (
             <tr key={i}>
@@ -61,20 +79,45 @@ export default function Dashboard({ logs }) {
               <td>{log.event || '—'}</td>
 
               <td>
-                <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
+                <a
+                  href={`/pay/${log.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   /pay/{log.slug}
                 </a>
               </td>
 
               <td>{log.ip || '—'}</td>
 
-              <td style={{ maxWidth: 300, wordBreak: 'break-all' }}>
+              <td
+                style={{
+                  maxWidth: 280,
+                  wordBreak: 'break-all',
+                  fontSize: '0.85rem',
+                }}
+              >
                 {log.userAgent || '—'}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Pagination */}
+      <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+        {page > 1 && (
+          <Link href={`/dashboard?page=${page - 1}`}>
+            ← Vorige
+          </Link>
+        )}
+
+        {page < totalPages && (
+          <Link href={`/dashboard?page=${page + 1}`}>
+            Volgende →
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
