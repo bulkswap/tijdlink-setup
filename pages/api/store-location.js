@@ -21,11 +21,20 @@ export default async function handler(req, res) {
 
   const now = Date.now();
 
+  const ip =
+    req.headers['x-forwarded-for']?.split(',')[0] ||
+    req.socket?.remoteAddress ||
+    'unknown';
+
+  const userAgent = req.headers['user-agent'] || 'unknown';
+
   const log = {
     id: `log-${slug}-${now}`,
     slug,
     flow,
-    event,                     // visit | allowed | denied
+    event, // visit | allowed | denied | expired-hit
+    ip,
+    userAgent,
     lat: lat ?? null,
     lng: lng ?? null,
     accuracy: accuracy ?? null,
@@ -37,10 +46,10 @@ export default async function handler(req, res) {
     time: now,
   };
 
-  // 🔥 log opslaan
+  // 🔥 opslaan
   await redis.set(log.id, log);
 
-  // 🔥 indexeren voor dashboard
+  // 🔥 index voor dashboard
   await redis.zadd('logs:index', {
     score: now,
     member: log.id,
