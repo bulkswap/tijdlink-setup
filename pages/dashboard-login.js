@@ -4,7 +4,7 @@ export default function DashboardLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const submit = async (e) => {
+  const submit = (e) => {
     e.preventDefault();
 
     if (password !== '2026') {
@@ -23,14 +23,11 @@ export default function DashboardLogin() {
       <form onSubmit={submit}>
         <input
           type="password"
-          placeholder="Wachtwoord"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ padding: '0.5rem', fontSize: '1rem' }}
+          placeholder="Wachtwoord"
         />
-        <button style={{ marginLeft: '0.5rem' }}>
-          Login
-        </button>
+        <button>Login</button>
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
