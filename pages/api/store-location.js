@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   } = req.body;
 
   if (!slug || !event) {
-    return res.status(400).json({ error: 'Missing data' });
+    return res.status(400).json({ error: 'Missing slug or event' });
   }
 
   const now = Date.now();
@@ -25,18 +25,22 @@ export default async function handler(req, res) {
     id: `log-${slug}-${now}`,
     slug,
     flow,
-    event,
+    event,                     // visit | allowed | denied
     lat: lat ?? null,
     lng: lng ?? null,
     accuracy: accuracy ?? null,
-    locationStatus: denied ? 'denied' : lat ? 'allowed' : 'unknown',
+    locationStatus: denied
+      ? 'denied'
+      : lat && lng
+      ? 'allowed'
+      : 'unknown',
     time: now,
   };
 
-  // ✅ log opslaan
+  // 🔥 log opslaan
   await redis.set(log.id, log);
 
-  // ✅ index bijwerken (belangrijk voor dashboard!)
+  // 🔥 indexeren voor dashboard
   await redis.zadd('logs:index', {
     score: now,
     member: log.id,
