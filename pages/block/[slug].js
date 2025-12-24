@@ -1,27 +1,51 @@
-export async function getServerSideProps({ params }) {
+import redis from '../../lib/redis';
+
+export async function getServerSideProps({ params, req }) {
   const { slug } = params;
 
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const parsed = await redis.get(`slug-${slug}`);
+  if (!parsed) {
+    return { notFound: true };
+  }
 
-  const res = await fetch(`${redisUrl}/get/slug-${slug}`, {
-    headers: { Authorization: `Bearer ${redisToken}` },
+  const now = Date.now();
+
+  const ip =
+    req.headers['x-forwarded-for']?.split(',')[0] ||
+    req.socket?.remoteAddress ||
+    'unknown';
+
+  const userAgent = req.headers['user-agent'] || 'unknown';
+
+  /* --------------------------------------------------
+     SLUG BLOKKEREN → verify-blocked
+  -------------------------------------------------- */
+  await redis.set(`slug-${slug}`, {
+    ...parsed,
+    flow: 'verify-blocked',
   });
 
-  if (!res.ok) return { notFound: true };
+  /* --------------------------------------------------
+     LOG: slug handmatig geblokkeerd
+  -------------------------------------------------- */
+  const logId = `log-${slug}-${now}-${Math.random()
+    .toString(36)
+    .slice(2)}`;
 
-  const parsed = JSON.parse((await res.json()).result);
+  const logData = {
+    id: logId,
+    slug,
+    flow: 'system',
+    event: 'slug-blocked',
+    ip,
+    userAgent,
+    time: now,
+  };
 
-  await fetch(`${redisUrl}/set/slug-${slug}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${redisToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      ...parsed,
-      flow: 'verify-blocked',
-    }),
+  await redis.set(logId, logData);
+  await redis.zadd('logs:index', {
+    score: now,
+    member: logId,
   });
 
   return { props: {} };
