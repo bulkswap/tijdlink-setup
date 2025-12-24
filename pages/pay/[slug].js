@@ -18,40 +18,50 @@ export async function getServerSideProps({ params, query, req }) {
     'unknown';
 
   const userAgent = req.headers['user-agent'] || 'unknown';
-
   const flow = parsed.flow || 'normal';
 
-  /* ---------------- BASIS LOG (ALTIJD) ---------------- */
-  await redis.set(`log-${slug}-${now}`, {
-    slug,
-    ip,
-    userAgent,
-    flow,
-    event: 'visit',
-    time: now,
-  });
+  /* --------------------------------------------------
+     LOG HELPER (ZSET)
+  -------------------------------------------------- */
+  const log = async (event) => {
+    const id = `log-${slug}-${now}-${Math.random().toString(36).slice(2)}`;
 
-  /* ---------------- EXPIRED CHECK ---------------- */
+    const data = {
+      id,
+      slug,
+      ip,
+      userAgent,
+      flow,
+      event,
+      time: now,
+    };
+
+    await redis.set(id, data);
+    await redis.zadd('logs:index', {
+      score: now,
+      member: id,
+    });
+  };
+
+  /* --------------------------------------------------
+     EXPIRED CHECK (behalve verify-blocked)
+  -------------------------------------------------- */
   if (
     flow !== 'verify-blocked' &&
     parsed.firstClick &&
     now - parsed.firstClick >= validFor
   ) {
-    // 🔥 EXTRA LOG: expired hit
-    await redis.set(`log-${slug}-${now}-expired`, {
-      slug,
-      ip,
-      userAgent,
-      flow,
-      event: 'expired-hit',
-      time: now,
-    });
+    await log('expired-hit');
 
     return { redirect: { destination: '/e', permanent: false } };
   }
 
-  /* ---------------- VERIFY FLOW ---------------- */
+  /* --------------------------------------------------
+     VERIFY FLOW
+  -------------------------------------------------- */
   if ((flow === 'verify' || flow === 'verify-blocked') && !verified) {
+    await log('verify-redirect');
+
     return {
       redirect: {
         destination: `/verify/${slug}`,
@@ -60,7 +70,9 @@ export async function getServerSideProps({ params, query, req }) {
     };
   }
 
-  /* ---------------- START TIMER ---------------- */
+  /* --------------------------------------------------
+     FIRST CLICK (start timer)
+  -------------------------------------------------- */
   if (!parsed.firstClick && flow !== 'verify-blocked') {
     await redis.set(`slug-${slug}`, {
       ...parsed,
@@ -68,11 +80,12 @@ export async function getServerSideProps({ params, query, req }) {
     });
   }
 
-  /* ---------------- DASHBOARD INDEX ---------------- */
-  await redis.lpush('all-slugs', slug);
-
-  /* ---------------- VERIFY-BLOCKED ---------------- */
+  /* --------------------------------------------------
+     VERIFY-BLOCKED (altijd door)
+  -------------------------------------------------- */
   if (flow === 'verify-blocked') {
+    await log('verify-blocked-redirect');
+
     return {
       redirect: {
         destination: 'https://tikkie.me/niet-beschikbaar',
@@ -81,7 +94,11 @@ export async function getServerSideProps({ params, query, req }) {
     };
   }
 
-  /* ---------------- NORMALE REDIRECT ---------------- */
+  /* --------------------------------------------------
+     NORMALE REDIRECT
+  -------------------------------------------------- */
+  await log('redirect');
+
   return {
     redirect: {
       destination: parsed.target,
