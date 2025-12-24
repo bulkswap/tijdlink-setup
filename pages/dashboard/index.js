@@ -4,7 +4,7 @@ import Link from 'next/link';
 const PER_PAGE = 25;
 
 export async function getServerSideProps({ query, req }) {
-  /* 🔐 AUTH CHECK */
+  /* 🔐 AUTH */
   const cookie = req.headers.cookie || '';
   if (!cookie.includes('dashboard_auth=ok')) {
     return {
@@ -22,7 +22,7 @@ export async function getServerSideProps({ query, req }) {
   let total = 0;
 
   if (search) {
-    // 🔎 Zoek in max 100 recente logs (snel)
+    // 🔎 Zoekmodus: scan max 100 recente logs (snel)
     const ids = await redis.zrange('logs:index', 0, 99, { rev: true });
 
     for (const id of ids || []) {
@@ -34,6 +34,7 @@ export async function getServerSideProps({ query, req }) {
 
     total = logs.length;
   } else {
+    // 📄 Normale paginatie
     const start = (page - 1) * PER_PAGE;
     const end = start + PER_PAGE - 1;
 
@@ -86,16 +87,17 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
       <p>
         Totaal <strong>{total}</strong> kliks
         {!search && (
-          <>
-            {' '}· Pagina <strong>{page}</strong> van{' '}
-            <strong>{totalPages}</strong>
-          </>
+          <> · Pagina <strong>{page}</strong> van <strong>{totalPages}</strong></>
         )}
       </p>
 
       {logs.length === 0 && <p>Geen resultaten.</p>}
 
-      <table border="1" cellPadding="8" style={{ width: '100%' }}>
+      <table
+        border="1"
+        cellPadding="8"
+        style={{ width: '100%', borderCollapse: 'collapse' }}
+      >
         <thead>
           <tr>
             <th>Tijd</th>
@@ -104,6 +106,8 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
             <th>Event</th>
             <th>Pay</th>
             <th>IP</th>
+            <th>Locatie</th>
+            <th>Status</th>
             <th>User Agent</th>
           </tr>
         </thead>
@@ -111,20 +115,49 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
           {logs.map((log, i) => (
             <tr key={i}>
               <td>{new Date(log.time).toLocaleString()}</td>
+
               <td>
                 <Link href={`/dashboard/${log.slug}`}>
                   {log.slug}
                 </Link>
               </td>
+
               <td>{log.flow || '—'}</td>
               <td>{log.event || '—'}</td>
+
               <td>
                 <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
                   /pay/{log.slug}
                 </a>
               </td>
+
               <td>{log.ip || '—'}</td>
-              <td style={{ maxWidth: 300, wordBreak: 'break-all' }}>
+
+              <td>
+                {log.lat && log.lng ? (
+                  <a
+                    href={`https://www.google.com/maps?q=${log.lat},${log.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    📍 kaart
+                  </a>
+                ) : '—'}
+              </td>
+
+              <td>
+                {log.locationStatus === 'allowed' && '✅ toegestaan'}
+                {log.locationStatus === 'denied' && '❌ geweigerd'}
+                {!log.locationStatus && '—'}
+              </td>
+
+              <td
+                style={{
+                  maxWidth: 320,
+                  wordBreak: 'break-all',
+                  fontSize: '0.85rem',
+                }}
+              >
                 {log.userAgent || '—'}
               </td>
             </tr>
@@ -132,14 +165,15 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
         </tbody>
       </table>
 
+      {/* 📄 PAGINATIE */}
       {!search && (
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
           {page > 1 && (
             <Link href={`/dashboard?page=${page - 1}`}>
               ← Vorige
             </Link>
           )}
-          {' '}
+
           {page < totalPages && (
             <Link href={`/dashboard?page=${page + 1}`}>
               Volgende →
