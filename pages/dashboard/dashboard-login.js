@@ -1,33 +1,39 @@
-export async function getServerSideProps({ req }) {
-  // Als al ingelogd → direct door
-  const cookie = req.headers.cookie || '';
-  if (cookie.includes('dashboard_auth=ok')) {
-    return {
-      redirect: {
-        destination: '/dashboard',
-        permanent: false,
-      },
-    };
+export const config = {
+  api: {
+    bodyParser: false, // 👈 belangrijk
+  },
+};
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    res.status(405).end();
+    return;
   }
 
-  return { props: {} };
-}
+  // 🔥 RAW BODY LEZEN
+  let body = '';
+  await new Promise((resolve) => {
+    req.on('data', (chunk) => {
+      body += chunk.toString();
+    });
+    req.on('end', resolve);
+  });
 
-export default function DashboardLogin() {
-  return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Dashboard login</h1>
+  // body = "password=2026"
+  const params = new URLSearchParams(body);
+  const password = params.get('password');
 
-      <form method="POST" action="/api/dashboard-login">
-        <input
-          type="password"
-          name="password"
-          placeholder="Wachtwoord"
-          style={{ padding: '0.5rem', fontSize: '1rem' }}
-        />
-        <br /><br />
-        <button type="submit">Inloggen</button>
-      </form>
-    </div>
-  );
+  if (password !== '2026') {
+    res.status(401).send('Verkeerd wachtwoord');
+    return;
+  }
+
+  // 🍪 COOKIE ZETTEN (server-side)
+  res.setHeader('Set-Cookie', [
+    'dashboard_auth=ok; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400',
+  ]);
+
+  // ➜ redirect naar dashboard
+  res.writeHead(302, { Location: '/dashboard' });
+  res.end();
 }
