@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const {
     slug,
     flow = 'verify',
-    event,
+    event,            // allowed | denied | visit
     lat,
     lng,
     accuracy,
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     id: `log-${slug}-${now}`,
     slug,
     flow,
-    event, // visit | allowed | denied | expired-hit
+    event,
     ip,
     userAgent,
     lat: lat ?? null,
@@ -46,10 +46,10 @@ export default async function handler(req, res) {
     time: now,
   };
 
-  // 🔥 opslaan
+  /* 🔥 LOG OPSLAAN */
   await redis.set(log.id, log);
 
-  // 🔥 index voor dashboard
+  /* 🔥 INDEX VOOR DASHBOARD */
   await redis.zadd('logs:index', {
     score: now,
     member: log.id,
