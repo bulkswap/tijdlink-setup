@@ -10,19 +10,31 @@ export async function getServerSideProps() {
     if (data) logs.push(data);
   }
 
+  // Nieuw → sorteer nieuwste eerst
   logs.sort((a, b) => b.time - a.time);
 
-  return { props: { logs } };
+  // Nieuw → max 50 entries
+  const limitedLogs = logs.slice(0, 50);
+
+  return {
+    props: {
+      logs: limitedLogs,
+    },
+  };
 }
 
 export default function Dashboard({ logs }) {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Dashboard – Alle kliks</h1>
+      <h1>Dashboard – Laatste 50 kliks</h1>
 
       {logs.length === 0 && <p>Nog geen kliks.</p>}
 
-      <table border="1" cellPadding="8" style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <table
+        border="1"
+        cellPadding="8"
+        style={{ width: '100%', borderCollapse: 'collapse' }}
+      >
         <thead>
           <tr>
             <th>Tijd</th>
@@ -31,6 +43,7 @@ export default function Dashboard({ logs }) {
             <th>Event</th>
             <th>Pay link</th>
             <th>IP</th>
+            <th>User-Agent</th>
           </tr>
         </thead>
         <tbody>
@@ -44,16 +57,20 @@ export default function Dashboard({ logs }) {
                 </Link>
               </td>
 
-              <td>{log.flow}</td>
-              <td>{log.event}</td>
+              <td>{log.flow || '—'}</td>
+              <td>{log.event || '—'}</td>
 
               <td>
-                <a href={`/pay/${log.slug}`} target="_blank">
+                <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
                   /pay/{log.slug}
                 </a>
               </td>
 
-              <td>{log.ip}</td>
+              <td>{log.ip || '—'}</td>
+
+              <td style={{ maxWidth: 300, wordBreak: 'break-all' }}>
+                {log.userAgent || '—'}
+              </td>
             </tr>
           ))}
         </tbody>
