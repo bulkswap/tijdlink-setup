@@ -3,19 +3,25 @@ import { useState } from 'react';
 export default function DashboardLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-    if (password !== '2026') {
+    const res = await fetch('/api/dashboard-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+
+    if (res.ok) {
+      window.location.href = '/dashboard';
+    } else {
       setError('Verkeerd wachtwoord');
-      return;
+      setLoading(false);
     }
-
-    // simpele cookie (24 uur geldig)
-    document.cookie = `dashboard_auth=ok; path=/; max-age=${60 * 60 * 24}`;
-
-    window.location.href = '/dashboard';
   };
 
   return (
@@ -31,7 +37,9 @@ export default function DashboardLogin() {
           style={{ padding: '0.5rem', fontSize: '1rem' }}
         />
         <br /><br />
-        <button type="submit">Inloggen</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Even geduld…' : 'Inloggen'}
+        </button>
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
