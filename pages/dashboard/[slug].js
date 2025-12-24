@@ -65,6 +65,7 @@ export default function DashboardSlug({ slug, logs }) {
               <th>Flow</th>
               <th>Event</th>
               <th>IP</th>
+              <th>Locatie</th>
               <th>User Agent</th>
             </tr>
           </thead>
@@ -72,9 +73,27 @@ export default function DashboardSlug({ slug, logs }) {
             {logs.map((log, i) => (
               <tr key={i}>
                 <td>{new Date(log.time).toLocaleString()}</td>
+
                 <td>{log.flow || '—'}</td>
+
                 <td>{log.event || '—'}</td>
+
                 <td>{log.ip || '—'}</td>
+
+                <td>
+                  {log.lat && log.lng ? (
+                    <a
+                      href={`https://www.google.com/maps?q=${log.lat},${log.lng}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      📍 Bekijk kaart
+                    </a>
+                  ) : (
+                    '—'
+                  )}
+                </td>
+
                 <td
                   style={{
                     maxWidth: 400,
