@@ -8,11 +8,11 @@ export async function getServerSideProps({ query }) {
   const start = (page - 1) * PER_PAGE;
   const end = start + PER_PAGE - 1;
 
-  // 🔥 alleen 25 IDs ophalen
-  const ids = await redis.zrevrange('logs:index', start, end);
+  // ✅ veilige Upstash-call
+  const ids = await redis.zrange('logs:index', start, end, { rev: true });
 
   const logs = [];
-  for (const id of ids) {
+  for (const id of ids || []) {
     const data = await redis.get(id);
     if (data) logs.push(data);
   }
@@ -71,7 +71,7 @@ export default function Dashboard({ logs, page, totalPages, total }) {
               <td>{log.event}</td>
 
               <td>
-                <a href={`/pay/${log.slug}`} target="_blank">
+                <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
                   /pay/{log.slug}
                 </a>
               </td>
