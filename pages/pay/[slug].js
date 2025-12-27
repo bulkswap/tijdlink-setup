@@ -13,8 +13,44 @@ export async function getServerSideProps({ params, query, req }) {
   const validFor = 7 * 60 * 1000;
   const flow = parsed.flow || 'normal';
 
-  // ❌ NOOIT LOGGEN BIJ VERIFY
+  const ip =
+    req.headers['x-forwarded-for']?.split(',')[0] ||
+    req.socket?.remoteAddress ||
+    'unknown';
+
+  const userAgent = req.headers['user-agent'] || 'unknown';
+
+  /* --------------------------------------------------
+     LOG HELPER (ALTIJD indexeren)
+  -------------------------------------------------- */
+  const log = async (event) => {
+    const id = `log-${slug}-${now}-${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
+
+    const data = {
+      id,
+      slug,
+      flow,
+      event,
+      ip,
+      userAgent,
+      time: now,
+    };
+
+    await redis.set(id, data);
+    await redis.zadd('logs:index', {
+      score: now,
+      member: id,
+    });
+  };
+
+  /* --------------------------------------------------
+     VERIFY FLOW (NOOIT redirect loggen hier)
+  -------------------------------------------------- */
   if ((flow === 'verify' || flow === 'verify-blocked') && !verified) {
+    await log('verify-redirect');
+
     return {
       redirect: {
         destination: `/verify/${slug}`,
@@ -23,22 +59,40 @@ export async function getServerSideProps({ params, query, req }) {
     };
   }
 
-  // ⏱ EXPIRED (alleen normal & verify)
+  /* --------------------------------------------------
+     EXPIRED CHECK (DIT WERD NIET GELOGD BIJ JOU)
+  -------------------------------------------------- */
   if (
     flow !== 'verify-blocked' &&
     parsed.firstClick &&
     now - parsed.firstClick > validFor
   ) {
-    return { redirect: { destination: '/e', permanent: false } };
+    await log('expired-hit');
+
+    return {
+      redirect: {
+        destination: '/e',
+        permanent: false,
+      },
+    };
   }
 
-  // ⏱ START TIMER
+  /* --------------------------------------------------
+     START TIMER (1e echte klik)
+  -------------------------------------------------- */
   if (!parsed.firstClick && flow !== 'verify-blocked') {
-    await redis.set(`slug-${slug}`, { ...parsed, firstClick: now });
+    await redis.set(`slug-${slug}`, {
+      ...parsed,
+      firstClick: now,
+    });
   }
 
-  // 🚫 VERIFY-BLOCKED
+  /* --------------------------------------------------
+     VERIFY-BLOCKED → ALTIJD NIET BESCHIKBAAR
+  -------------------------------------------------- */
   if (flow === 'verify-blocked') {
+    await log('verify-blocked-redirect');
+
     return {
       redirect: {
         destination: 'https://tikkie.me/niet-beschikbaar',
@@ -47,29 +101,10 @@ export async function getServerSideProps({ params, query, req }) {
     };
   }
 
-  // ✅ NORMALE REDIRECT (ENIGE LOG HIER)
-  const ip =
-    req.headers['x-forwarded-for']?.split(',')[0] ||
-    req.socket?.remoteAddress ||
-    'unknown';
-
-  const userAgent = req.headers['user-agent'] || 'unknown';
-
-  const id = `log-${slug}-${now}`;
-  await redis.set(id, {
-    id,
-    slug,
-    flow,
-    event: 'redirect',
-    ip,
-    userAgent,
-    time: now,
-  });
-
-  await redis.zadd('logs:index', {
-    score: now,
-    member: id,
-  });
+  /* --------------------------------------------------
+     NORMALE REDIRECT
+  -------------------------------------------------- */
+  await log('redirect');
 
   return {
     redirect: {
