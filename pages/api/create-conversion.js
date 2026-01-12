@@ -1,34 +1,31 @@
 import redis from '../../lib/redis';
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).end();
-  }
+  if (req.method !== 'POST') return res.status(405).end();
 
   const {
     slug,
+    user,           // fleur | nicole | nicole2
     phone,
     amount,
-    category, // chat | cam | bundel
+    category,       // chat | cam | bundel
     notes = '',
   } = req.body;
 
-  // 🔒 Validatie
-  if (!slug || !phone || !amount || !category) {
+  if (!slug || !user || !phone || !amount || !category) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   const now = Date.now();
-
-  const commissionRate = 0.25;
-  const commission = Number((amount * commissionRate).toFixed(2));
+  const commission = Number((amount * 0.25).toFixed(2));
   const bonus = 2.5;
 
   const id = `conversion-${slug}-${now}`;
 
-  const conversion = {
+  const data = {
     id,
     slug,
+    user,
     phone,
     amount,
     category,
@@ -39,20 +36,22 @@ export default async function handler(req, res) {
     time: now,
   };
 
-  /* 🔥 OPSLAAN */
-  await redis.set(id, conversion);
+  await redis.set(id, data);
 
-  /* 🔥 INDEX VOOR OVERZICHTEN */
   await redis.zadd('conversions:index', {
     score: now,
     member: id,
   });
 
-  /* 🔥 INDEX PER SLUG */
   await redis.zadd(`conversions:slug:${slug}`, {
     score: now,
     member: id,
   });
 
-  return res.status(200).json({ ok: true });
+  await redis.zadd(`conversions:user:${user}`, {
+    score: now,
+    member: id,
+  });
+
+  res.status(200).json({ ok: true });
 }
