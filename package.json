@@ -10,7 +10,7 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "nanoid": "^4.0.0",
+    "nanoid": "^5.1.6",
     "@upstash/redis": "^1.22.0"
   }
 }
