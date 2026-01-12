@@ -2,6 +2,7 @@ import redis from '../../lib/redis';
 import Link from 'next/link';
 
 const PER_PAGE = 25;
+const MAX_SCAN_SUBUSER = 200; // 🔥 performance fix
 
 export async function getServerSideProps({ query, req }) {
   /* 🔐 AUTH */
@@ -66,10 +67,15 @@ export async function getServerSideProps({ query, req }) {
     if (isAdmin) {
       total = await redis.zcard('logs:index');
     } else {
-      // 🧮 sub-user: tel alleen eigen logs (max 500)
-      const all = await redis.zrange('logs:index', 0, 499, { rev: true });
-      let count = 0;
+      // ⚡ PERFORMANCE FIX: scan max 200 logs
+      const all = await redis.zrange(
+        'logs:index',
+        0,
+        MAX_SCAN_SUBUSER - 1,
+        { rev: true }
+      );
 
+      let count = 0;
       for (const id of all || []) {
         const d = await redis.get(id);
         if (d?.source === user) count++;
@@ -130,7 +136,11 @@ export default function Dashboard({
       <p>
         Totaal <strong>{total}</strong> kliks
         {!search && (
-          <> · Pagina <strong>{page}</strong> van <strong>{totalPages}</strong></>
+          <>
+            {' '}
+            · Pagina <strong>{page}</strong> van{' '}
+            <strong>{totalPages}</strong>
+          </>
         )}
       </p>
 
@@ -189,7 +199,9 @@ export default function Dashboard({
                   >
                     📍 kaart
                   </a>
-                ) : '—'}
+                ) : (
+                  '—'
+                )}
               </td>
 
               <td>
