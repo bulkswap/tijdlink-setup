@@ -6,7 +6,10 @@ const PER_PAGE = 25;
 export async function getServerSideProps({ query, req }) {
   /* 🔐 AUTH */
   const cookie = req.headers.cookie || '';
-  if (!cookie.includes('dashboard_auth=ok')) {
+  const match = cookie.match(/dashboard_auth=([^;]+)/);
+  const user = match?.[1];
+
+  if (!user) {
     return {
       redirect: {
         destination: '/dashboard-login',
@@ -15,26 +18,37 @@ export async function getServerSideProps({ query, req }) {
     };
   }
 
+  const isAdmin = user === 'admin';
+
   const page = parseInt(query.page || '1', 10);
   const search = (query.q || '').trim().toLowerCase();
 
   let logs = [];
   let total = 0;
 
+  /* --------------------------------------------------
+     🔎 ZOEKMODE (max 100 logs scannen)
+  -------------------------------------------------- */
   if (search) {
-    // 🔎 Zoekmodus: scan max 100 recente logs (snel)
     const ids = await redis.zrange('logs:index', 0, 99, { rev: true });
 
     for (const id of ids || []) {
       const data = await redis.get(id);
-      if (data && data.slug?.toLowerCase().includes(search)) {
+      if (!data) continue;
+
+      if (
+        data.slug?.toLowerCase().includes(search) &&
+        (isAdmin || data.source === user)
+      ) {
         logs.push(data);
       }
     }
 
     total = logs.length;
   } else {
-    // 📄 Normale paginatie
+    /* --------------------------------------------------
+       📄 NORMALE PAGINATIE
+    -------------------------------------------------- */
     const start = (page - 1) * PER_PAGE;
     const end = start + PER_PAGE - 1;
 
@@ -42,10 +56,27 @@ export async function getServerSideProps({ query, req }) {
 
     for (const id of ids || []) {
       const data = await redis.get(id);
-      if (data) logs.push(data);
+      if (!data) continue;
+
+      if (isAdmin || data.source === user) {
+        logs.push(data);
+      }
     }
 
-    total = await redis.zcard('logs:index');
+    if (isAdmin) {
+      total = await redis.zcard('logs:index');
+    } else {
+      // 🧮 sub-user: tel alleen eigen logs (max 500)
+      const all = await redis.zrange('logs:index', 0, 499, { rev: true });
+      let count = 0;
+
+      for (const id of all || []) {
+        const d = await redis.get(id);
+        if (d?.source === user) count++;
+      }
+
+      total = count;
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
@@ -57,14 +88,26 @@ export async function getServerSideProps({ query, req }) {
       totalPages,
       total,
       search,
+      user,
+      isAdmin,
     },
   };
 }
 
-export default function Dashboard({ logs, page, totalPages, total, search }) {
+export default function Dashboard({
+  logs,
+  page,
+  totalPages,
+  total,
+  search,
+  user,
+  isAdmin,
+}) {
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>Dashboard – Kliklog</h1>
+      <h1>
+        Dashboard – {isAdmin ? 'Admin' : user}
+      </h1>
 
       {/* 🔎 ZOEKEN */}
       <form method="GET" style={{ marginBottom: '1rem' }}>
@@ -126,7 +169,11 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
               <td>{log.event || '—'}</td>
 
               <td>
-                <a href={`/pay/${log.slug}`} target="_blank" rel="noreferrer">
+                <a
+                  href={`/pay/${log.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   /pay/{log.slug}
                 </a>
               </td>
@@ -165,7 +212,6 @@ export default function Dashboard({ logs, page, totalPages, total, search }) {
         </tbody>
       </table>
 
-      {/* 📄 PAGINATIE */}
       {!search && (
         <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
           {page > 1 && (
