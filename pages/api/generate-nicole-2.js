@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   } while (await redis.get(`slug-${slug}`));
 
   await redis.set(`slug-${slug}`, {
-    target: "https://tikkie.me/pay/eb7794219bf6bvoh7et0",
+    target: "https://beltegoed.nl/order?productId=56361&quantity=1",
     firstClick: null,
   });
 
