@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   } while (await redis.get(`slug-${slug}`));
 
   await redis.set(`slug-${slug}`, {
-    target: "https://startselect.com/nl-nl/bolcom-cadeaukaart-50/70809",
+    target: "https://tikkie.me/verlopen/",
     firstClick: null,
   });
 
